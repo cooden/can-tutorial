@@ -6,14 +6,13 @@
 (function () {
   'use strict';
 
-  /* 融合单页：前 6 章在 index.html 内用锚点跳转，tools.html 保持独立页 */
+  /* 融合单页：各章在 index.html 内用锚点跳转 */
   var CHAPTER_ANCHOR = {
     'can-basics': 'ch1',
     'can-framing': 'ch2',
     'canopen': 'ch3',
     'object-dictionary': 'ch4',
-    'communication': 'ch5',
-    'devices': 'ch6'
+    'communication': 'ch5'
   };
 
   function isIndexPage() {
@@ -23,7 +22,6 @@
 
   function linkFor(file) {
     if (file === 'index.html') return isIndexPage() ? '#top' : 'index.html';
-    if (file === 'tools.html') return 'tools.html';
     var key = file.replace(/\.html$/, '');
     if (CHAPTER_ANCHOR[key]) {
       return isIndexPage() ? '#' + CHAPTER_ANCHOR[key] : 'index.html#' + CHAPTER_ANCHOR[key];
@@ -37,9 +35,7 @@
     { href: 'can-framing.html', label: '帧格式' },
     { href: 'canopen.html', label: 'CANopen' },
     { href: 'object-dictionary.html', label: '对象字典' },
-    { href: 'communication.html', label: '通信对象' },
-    { href: 'devices.html', label: '设备协议' },
-    { href: 'tools.html', label: '工具速查' }
+    { href: 'communication.html', label: '通信对象' }
   ];
 
   var SIDEBAR = [
@@ -61,9 +57,7 @@
       items: [
         { href: 'canopen.html', label: '3. CANopen 概述' },
         { href: 'object-dictionary.html', label: '4. 对象字典 (OD)' },
-        { href: 'communication.html', label: '5. 通信对象 (SDO/PDO/NMT)' },
-        { href: 'devices.html', label: '6. 设备子协议与 EDS/DCF' },
-        { href: 'tools.html', label: '7. 工具与参数速查' }
+        { href: 'communication.html', label: '5. 通信对象 (SDO/PDO/NMT)' }
       ]
     }
   ];
@@ -101,7 +95,7 @@
     return '' +
       '<div class="footer-inner">' +
         '<div>© 2026 CAN / CANopen 学习站 · 基于 CiA 301 / ISO 11898 整理</div>' +
-        '<div><a href="' + linkFor('index.html') + '">首页</a> · <a href="' + linkFor('tools.html') + '">速查表</a> · <a href="' + linkFor('canopen.html') + '">CANopen</a></div>' +
+        '<div><a href="' + linkFor('index.html') + '">首页</a> · <a href="' + linkFor('canopen.html') + '">CANopen</a></div>' +
       '</div>';
   }
 
