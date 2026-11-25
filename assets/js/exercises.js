@@ -1,7 +1,7 @@
 /* ============================================================
    章节练习题：题库数据 + 渲染 + 答题保存(localStorage) + 导出 TXT
-   支持两种题型：choice（单选）/ text（简答）
-   每章统一 12 题（6 选择 + 6 简答），覆盖全章知识点
+   支持两种题型：choice（单选）/ text（填空）
+   各章题量不同，覆盖全章核心知识点
    ============================================================ */
 (function () {
   'use strict';
@@ -17,14 +17,7 @@
         { type: 'choice', q: 'CAN 总线两端终端电阻的标准阻值是？', options: ['60 Ω', '100 Ω', '120 Ω', '240 Ω'], answer: 'C' },
         { type: 'choice', q: 'CAN 2.0B 扩展帧的标识符长度是？', options: ['11 位', '16 位', '29 位', '32 位'], answer: 'C' },
         { type: 'choice', q: 'CAN FD 相比经典 CAN，最大数据场长度提升到？', options: ['8 字节', '16 字节', '32 字节', '64 字节'], answer: 'D' },
-        { type: 'choice', q: 'CAN 总线推荐采用的拓扑结构是？', options: ['星型', '环型', '线性（总线）型', '树型'], answer: 'C' },
-        { type: 'choice', q: '关于 CAN 的“非破坏性仲裁”，下列说法正确的是？', options: ['仲裁失败的帧会破坏当前帧', '高优先级帧仲裁获胜后继续完整发送', '所有节点同时重发', '靠令牌传递决定优先级'], answer: 'B' },
-        { type: 'text', q: 'CAN 总线为什么采用差分信号（CAN_H / CAN_L）传输？它带来了什么好处？' },
-        { type: 'text', q: '解释“显性”和“隐性”电平的含义，以及为什么显性可以覆盖隐性。' },
-        { type: 'text', q: 'CAN 总线两端为什么必须接 120 Ω 终端电阻？如果不接会出现什么问题？' },
-        { type: 'text', q: 'CAN 的拓扑结构为什么推荐线性（总线）型，而不推荐星型或树型？' },
-        { type: 'text', q: '一个 CAN 网络里所有节点的波特率必须一致吗？为什么？' },
-        { type: 'text', q: '如果总线上某个节点持续发送显性位（stuck-at-dominant），会对整个网络造成什么影响？' }
+        { type: 'choice', q: 'CAN 总线推荐采用的拓扑结构是？', options: ['星型', '环型', '线性（总线）型', '树型'], answer: 'C' }
       ]
     },
 
@@ -37,13 +30,7 @@
         { type: 'choice', q: '发送错误计数器 TEC 达到多少时，节点进入 Bus-Off 状态？', options: ['127', '128', '255', '256'], answer: 'D' },
         { type: 'choice', q: '帧间空间（Intermission）由多少个隐性位组成？', options: ['2', '3', '5', '7'], answer: 'B' },
         { type: 'choice', q: 'CAN 位时序中，采样点（Sample Point）通常设置在？', options: ['位起始处', '位时间约 50% 处', '位时间约 80%–90% 处', '位结束处'], answer: 'C' },
-        { type: 'choice', q: '用于区分标准帧与扩展帧的控制位是？', options: ['RTR', 'IDE', 'SRR', 'DLC'], answer: 'B' },
-        { type: 'text', q: '标准帧（11 位 ID）和扩展帧（29 位 ID）在结构上的主要区别是什么？' },
-        { type: 'text', q: 'CAN 数据帧由哪几个场组成？请按发送顺序列出。' },
-        { type: 'text', q: '位时序中 TQ（Time Quanta）是什么？一个位时间由哪几个段组成？' },
-        { type: 'text', q: '采样点通常设置在位时间的什么位置？为什么这样设置？' },
-        { type: 'text', q: '错误帧由哪两部分组成？错误标志分为哪两种？' },
-        { type: 'text', q: '解释“错误主动（Error Active）”和“错误被动（Error Passive）”两种状态的区别。' }
+        { type: 'choice', q: '用于区分标准帧与扩展帧的控制位是？', options: ['RTR', 'IDE', 'SRR', 'DLC'], answer: 'B' }
       ]
     },
 
@@ -101,44 +88,6 @@
         { type: 'text', q: 'PDO 的通信参数和映射参数分别存放在对象字典的哪些索引段？' },
         { type: 'text', q: 'NMT 报文的 COB-ID 是多少？它的目标节点如何指定（广播还是单播）？' },
         { type: 'text', q: 'SYNC 报文的作用是什么？它如何触发 PDO 的同步发送？' }
-      ]
-    },
-
-    /* ============ 第 6 章 设备子协议与 EDS/DCF ============ */
-    'devices': {
-      title: '第 6 章 · 设备子协议与 EDS/DCF',
-      questions: [
-        { type: 'choice', q: 'CiA 402 中，要使电机进入 Operation Enabled，控制字的典型写入顺序是？', options: ['0x06 → 0x07 → 0x0F', '0x0F → 0x07 → 0x06', '0x80 → 0x06', '0x01 → 0x02 → 0x03'], answer: 'A' },
-        { type: 'choice', q: '状态字（Statusword，0x6041）的 bit 3 置位表示？', options: ['Operation Enabled', 'Fault', 'Ready to Switch On', 'Quick Stop Active'], answer: 'B' },
-        { type: 'choice', q: '清除 CiA 402 驱动器故障，需要向控制字写入？', options: ['0x80', '0x06', '0x0F', '0x100'], answer: 'A' },
-        { type: 'choice', q: 'EDS 文件与 DCF 文件的主要区别是？', options: ['DCF 多了设备配置参数', 'EDS 内容更全', '二者完全无关', 'DCF 是二进制格式'], answer: 'A' },
-        { type: 'choice', q: 'LSS（Layer Setting Services）的主要作用是？', options: ['传输过程数据', '配置节点的 Node-ID 和波特率', '读写对象字典', '产生同步信号'], answer: 'B' },
-        { type: 'choice', q: '对象 0x6060（Modes of Operation）用于设置？', options: ['目标位置', '操作模式', '实际位置', '控制字'], answer: 'B' },
-        { type: 'text', q: 'CiA 402 状态机中，从“Not Ready to Switch On”到“Operation Enabled”需要经过哪些状态？请按顺序列出。' },
-        { type: 'text', q: '控制字（Controlword，0x6040）中哪些位用于触发状态机转换（Shutdown / Switch On / Enable Operation）？' },
-        { type: 'text', q: '状态字（Statusword，0x6041）的 bit 3（Fault）置位表示什么？如何清除故障？' },
-        { type: 'text', q: 'CiA 402 支持哪几种常用的操作模式？请列举至少 4 种。' },
-        { type: 'text', q: 'EDS 文件和 DCF 文件的区别是什么？DCF 相比 EDS 增加了什么内容？' },
-        { type: 'text', q: 'LSS（Layer Setting Services）的作用是什么？它主要用于什么场景？' }
-      ]
-    },
-
-    /* ============ 第 7 章 工具与参数速查 ============ */
-    'tools': {
-      title: '第 7 章 · 工具与参数速查',
-      questions: [
-        { type: 'choice', q: '500 kbps 波特率下，1 个位时间是？', options: ['1 µs', '2 µs', '5 µs', '10 µs'], answer: 'B' },
-        { type: 'choice', q: '下列哪一项不是 CAN 总线的常用波特率？', options: ['125 kbps', '250 kbps', '500 kbps', '1 Gbps'], answer: 'D' },
-        { type: 'choice', q: 'DBC 文件主要用于？', options: ['描述报文与信号的解析关系', '存储对象字典', '配置 Node-ID', '记录错误日志'], answer: 'A' },
-        { type: 'choice', q: '在 CAN 工具中导入 EDS 文件的主要目的是？', options: ['解析 CANopen 对象字典', '设置波特率', '抓取原始报文', '升级固件'], answer: 'A' },
-        { type: 'choice', q: '排查 CANopen 节点无法进入 Operational，首先应检查？', options: ['NMT 启动命令是否已发送', '终端电阻阻值', '线缆长度', '供电电压纹波'], answer: 'A' },
-        { type: 'choice', q: '一个 CAN 标准数据帧（11 位 ID + 8 字节数据）在 500 kbps 下的传输时间约为？', options: ['约 10 µs', '约 130 µs', '约 1 ms', '约 10 ms'], answer: 'B' },
-        { type: 'text', q: '常用的 CAN 总线分析工具有哪些？请列举至少 3 种并简述其特点。' },
-        { type: 'text', q: '使用 CANoe 等工具监控总线时，如何识别一条报文的 COB-ID 和数据方向？' },
-        { type: 'text', q: '当总线频繁出现 Bus-Off 时，应该从哪些方面进行排查？' },
-        { type: 'text', q: 'CAN 总线的常用波特率有哪些？500 kbps 下的位时间通常如何配置？' },
-        { type: 'text', q: '如何通过工具读取某个节点对象字典 0x1017 的值？该值的单位是什么？' },
-        { type: 'text', q: '排查 CANopen 节点无法进入 Operational 状态的思路是什么？' }
       ]
     }
   };
@@ -220,9 +169,12 @@
   }
   function exportAll() {
     var keys = Object.keys(EXERCISES);
-    keys.forEach(function (key, idx) {
-      setTimeout(function () { exportChapter(key); }, idx * 700);
+    var parts = [];
+    keys.forEach(function (key) {
+      var txt = buildChapterText(key);
+      if (txt) parts.push(txt);
     });
+    downloadTxt('全部练习答题.txt', parts.join('\r\n\r\n\r\n'));
   }
 
   /* ---------- 渲染练习区 ---------- */
@@ -271,7 +223,7 @@
     html += '</ol>';
     html += '<div class="ex-actions">' +
       '<button type="button" class="btn btn-primary ex-export-chapter">导出本章 TXT</button>' +
-      '<span class="ex-hint">提示：顶部「导出全部 TXT」可一次导出所有章节（每章一个文件）。</span>' +
+      '<span class="ex-hint">提示：顶部「导出全部 TXT」可把所有章节合并为一个 TXT 一次下载。</span>' +
       '</div>';
     wrap.innerHTML = html;
     summary.parentNode.insertBefore(wrap, summary.nextSibling);
