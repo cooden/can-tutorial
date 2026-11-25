@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CAN / CANopen 协议完整学习站 — 从入门到实战（单页版）</title>
-  <meta name="description" content="系统学习 CAN 总线与 CANopen 协议：物理层、帧格式、对象字典、SDO/PDO/NMT、设备子协议，单页通读，附每章练习与速查表。">
+  <meta name="description" content="系统学习 CAN 总线与 CANopen 协议：物理层、帧格式、对象字典、SDO/PDO/NMT，单页通读，附每章练习。">
     <style>
 :root {
   --primary: #1e3a8a;
@@ -444,7 +444,7 @@ tr:nth-child(even) td { background: #fafbfd; }
 .ex-opt input { margin-top: 4px; }
 .ex-opt-letter { font-weight: 700; color: var(--primary); min-width: 16px; }
   </style>
-  <script src="assets/js/analytics.js?v=20261125"></script>
+  <script src="assets/js/analytics.js?v=20261126"></script>
 </head>
 <body>
   <header class="site-header" id="site-header"></header>
@@ -458,7 +458,7 @@ tr:nth-child(even) td { background: #fafbfd; }
       <!-- ============ 首页 / 学习路线 ============ -->
       <section class="hero">
         <h1>CAN / CANopen 协议完整学习</h1>
-        <p>从 CAN 总线的物理层与帧仲裁，到 CANopen 的对象字典、SDO/PDO/NMT 与设备子协议——一套面向嵌入式与工业自动化工程师的系统化教程。本页已融合前 6 章，可单页通读；工具速查单独成页。</p>
+        <p>从 CAN 总线的物理层与帧仲裁，到 CANopen 的对象字典、SDO/PDO/NMT——一套面向嵌入式与工业自动化工程师的系统化教程。全章单页通读，附每章练习。</p>
         <div class="tags">
           <span class="tag">ISO 11898</span>
           <span class="tag">CiA 301</span>
@@ -468,7 +468,6 @@ tr:nth-child(even) td { background: #fafbfd; }
         </div>
         <div class="hero-cta">
           <a href="#ch1" class="btn btn-primary">开始学习 →</a>
-          <a href="tools.html" class="btn btn-ghost">查看速查表</a>
         </div>
       </section>
 
@@ -497,14 +496,6 @@ tr:nth-child(even) td { background: #fafbfd; }
             <h4>第 5 章 · 通信对象</h4>
             <p>SDO、PDO、NMT、SYNC、EMCY、心跳 实战。</p>
           </a>
-          <a class="card" href="#ch6">
-            <h4>第 6 章 · 设备子协议</h4>
-            <p>CiA 401 I/O、CiA 402 驱动、EDS/DCF 配置文件。</p>
-          </a>
-          <a class="card" href="tools.html">
-            <h4>第 7 章 · 工具与速查</h4>
-            <p>CANoe、PCAN、Wireshark、cangw 命令速查。</p>
-          </a>
         </div>
 
         <h2>CAN 与 CANopen 的关系</h2>
@@ -532,7 +523,7 @@ tr:nth-child(even) td { background: #fafbfd; }
         </ul>
         <div class="callout tip">
           <div class="callout-title">零基础？</div>
-          <p>没有问题。第 1、2 章会从最基础的差分信号讲起，逐步过渡到位级时序。遇到不懂的术语可随时查阅 <a href="tools.html">工具速查</a>。</p>
+          <p>没有问题。第 1、2 章会从最基础的差分信号讲起，逐步过渡到位级时序。</p>
         </div>
       </article>
 
@@ -1284,203 +1275,7 @@ ID=0x705  [05]              ← ... 周期心跳</code></pre>
 
           <div class="callout tip">
             <div class="callout-title">本章小结</div>
-            <p>SDO 走 <code>0x600/0x580 + ID</code> 读写 OD，≤4 字节用加速传输；PDO 走 <code>0x180/0x200 + ID</code> 传实时数据，靠映射打包；NMT 用 <code>0x000</code> 管状态；SYNC 用 <code>0x080</code> 同步；EMCY 用 <code>0x080+ID</code> 报警；心跳用 <code>0x700+ID</code> 报存活。下一章看设备子协议如何把这些对象组织成具体功能。</p>
-          </div>
-        </article>
-      </section>
-
-      <!-- ============ 第 6 章 ============ -->
-      <section class="chapter" id="ch6" data-chapter="devices">
-        <div class="breadcrumb"><a href="#top">首页</a> / 设备协议</div>
-        <h1 class="page-title">第 6 章 · 设备子协议与 EDS/DCF</h1>
-        <p class="page-sub">通信层之上，设备子协议定义“每个对象代表什么”。重点掌握 CiA 402 伺服驱动，以及用 EDS/DCF 文件配置设备的完整流程。</p>
-
-        <article>
-          <h2>6.1 什么是设备子协议</h2>
-          <p>CiA 301 只定义了通信层。对于具体设备（驱动器、IO 模块、编码器），还需要规范对象字典中 <strong>0x6000–0x9FFF</strong> 区域的对象含义，这些规范就是<strong>设备子协议（CiA 4xx 系列）</strong>。</p>
-          <p>有了设备子协议，不同厂商的同类设备就有了<strong>统一的对象字典</strong>，主站只要按子协议读写对象，就能驱动任何兼容设备——这是 CANopen“即插即用”的关键。</p>
-
-          <h3>常见设备子协议</h3>
-          <table>
-            <thead><tr><th>规范</th><th>设备类型</th><th>典型对象</th></tr></thead>
-            <tbody>
-              <tr><td>CiA 401</td><td>IO 模块（数字量/模拟量）</td><td>0x6000 写输出、0x6200 读输入、0x6401 模拟输入</td></tr>
-              <tr><td>CiA 402</td><td>伺服/步进驱动与运动控制</td><td>0x6040 控制字、0x6041 状态字、0x6060 模式</td></tr>
-              <tr><td>CiA 404</td><td>测量设备（传感器）</td><td>—</td></tr>
-              <tr><td>CiA 406</td><td>编码器</td><td>位置、分辨率、圈数</td></tr>
-              <tr><td>CiA 408</td><td>流体动力（液压/气动）</td><td>压力、流量</td></tr>
-              <tr><td>CiA 418/419</td><td>电池（充电/放电）</td><td>电压、电流、SOC</td></tr>
-            </tbody>
-          </table>
-
-          <h2>6.2 CiA 402 —— 驱动与运动控制（重点）</h2>
-          <p>CiA 402 是工业伺服最常用的协议，定义了驱动器的状态机、控制字/状态字、以及多种控制模式。</p>
-
-          <h3>6.2.1 驱动器状态机</h3>
-          <div class="frame">
-            <span>Not Ready</span><span>→</span><span>Switch on<br>disabled</span><span>→</span><span class="alt2">Ready to<br>switch on</span><span>→</span><span class="alt3">Switched<br>on</span><span>→</span><span class="alt">Operation<br>enabled</span>
-          </div>
-          <p>状态机由<strong>控制字 0x6040</strong> 驱动，由<strong>状态字 0x6041</strong> 反馈。典型上电启动序列：</p>
-          <pre><code>1. 控制字写 0x06  → Shutdown         → 进入 Ready to switch on
-2. 控制字写 0x07  → Switch On        → 进入 Switched on
-3. 控制字写 0x0F  → Enable Operation → 进入 Operation enabled（电机使能）
-# 故障复位：控制字写 0x80（再恢复）→ 清除 Fault 状态</code></pre>
-
-          <h3>6.2.2 控制字 0x6040 关键位</h3>
-          <table>
-            <thead><tr><th>位</th><th>名称</th><th>作用</th></tr></thead>
-            <tbody>
-              <tr><td>bit0</td><td>Switch on</td><td>接通主回路</td></tr>
-              <tr><td>bit1</td><td>Enable voltage</td><td>使能电压</td></tr>
-              <tr><td>bit2</td><td>Quick stop</td><td>快速停止（0 触发快停）</td></tr>
-              <tr><td>bit3</td><td>Enable operation</td><td>使能运行</td></tr>
-              <tr><td>bit4–7</td><td>模式相关</td><td>如位置模式的 new set-point / change immediate</td></tr>
-              <tr><td>bit8</td><td>Fault reset</td><td>上升沿复位故障</td></tr>
-            </tbody>
-          </table>
-
-          <h3>6.2.3 状态字 0x6041 关键位</h3>
-          <table>
-            <thead><tr><th>位</th><th>名称</th><th>含义</th></tr></thead>
-            <tbody>
-              <tr><td>bit0</td><td>Ready to switch on</td><td>就绪可上电</td></tr>
-              <tr><td>bit1</td><td>Switched on</td><td>已上电</td></tr>
-              <tr><td>bit2</td><td>Operation enabled</td><td>运行已使能</td></tr>
-              <tr><td>bit3</td><td>Fault</td><td>故障（1=故障）</td></tr>
-              <tr><td>bit4</td><td>Voltage enabled</td><td>使能电压正常</td></tr>
-              <tr><td>bit5</td><td>Quick stop</td><td>快停状态</td></tr>
-              <tr><td>bit6</td><td>Switch on disabled</td><td>上电禁止</td></tr>
-              <tr><td>bit7</td><td>Warning</td><td>警告</td></tr>
-              <tr><td>bit10</td><td>Target reached</td><td>目标到达</td></tr>
-              <tr><td>bit11</td><td>Internal limit active</td><td>触发内部限位</td></tr>
-            </tbody>
-          </table>
-          <div class="callout info">
-            <p>判断当前状态常看状态字 <strong>bit0–2, bit6 的组合</strong>。例如 Operation enabled 时 bit0=1, bit1=1, bit2=1, bit6=0。</p>
-          </div>
-
-          <h3>6.2.4 控制模式 0x6060</h3>
-          <table>
-            <thead><tr><th>值</th><th>模式</th><th>说明</th></tr></thead>
-            <tbody>
-              <tr><td>1</td><td>PP 轮廓位置</td><td>梯形速度规划，单点定位</td></tr>
-              <tr><td>3</td><td>PV 轮廓速度</td><td>梯形速度规划的速度控制</td></tr>
-              <tr><td>4</td><td>PT 轮廓转矩</td><td>转矩斜坡控制</td></tr>
-              <tr><td>6</td><td>HM 回零</td><td>回参考点（多种回零方式）</td></tr>
-              <tr><td>7</td><td>IP 插补位置</td><td>主站周期下发位置，从站插补</td></tr>
-              <tr><td>8</td><td>CSP 循环同步位置</td><td>SYNC 周期下发目标位置，高动态多轴同步</td></tr>
-              <tr><td>9</td><td>CSV 循环同步速度</td><td>SYNC 周期下发目标速度</td></tr>
-              <tr><td>10</td><td>CST 循环同步转矩</td><td>SYNC 周期下发目标转矩</td></tr>
-            </tbody>
-          </table>
-          <div class="callout tip">
-            <div class="callout-title">多轴同步选 CSP</div>
-            <p>机器人、多轴平台首选 <strong>CSP/CSV/CST</strong>：主站每个 SYNC 周期下发目标值，各轴同步采样，配合 0x60C4 插补周期可实现高动态同步。</p>
-          </div>
-
-          <h3>6.2.5 常用 CiA 402 对象速查</h3>
-          <table>
-            <thead><tr><th>对象</th><th>名称</th><th>单位</th></tr></thead>
-            <tbody>
-              <tr><td>0x6040</td><td>控制字</td><td>—</td></tr>
-              <tr><td>0x6041</td><td>状态字</td><td>—</td></tr>
-              <tr><td>0x6060 / 0x6061</td><td>模式设置 / 模式显示</td><td>—</td></tr>
-              <tr><td>0x607A</td><td>目标位置</td><td>用户单位</td></tr>
-              <tr><td>0x6064</td><td>实际位置</td><td>用户单位</td></tr>
-              <tr><td>0x60FF / 0x606C</td><td>目标速度 / 实际速度</td><td>用户单位/s</td></tr>
-              <tr><td>0x6071 / 0x6077</td><td>目标转矩 / 实际转矩</td><td>千分比额定</td></tr>
-              <tr><td>0x6081</td><td>轮廓速度</td><td>用户单位/s</td></tr>
-              <tr><td>0x6083 / 0x6084</td><td>轮廓加速度 / 减速度</td><td>用户单位/s²</td></tr>
-              <tr><td>0x6091 / 0x6092</td><td>电子齿轮分子 / 分母</td><td>—</td></tr>
-            </tbody>
-          </table>
-
-          <h2>6.3 CiA 401 —— IO 模块</h2>
-          <p>CiA 401 定义数字量/模拟量 IO 的标准对象，常用于分布式 IO：</p>
-          <table>
-            <thead><tr><th>对象</th><th>名称</th></tr></thead>
-            <tbody>
-              <tr><td>0x6000</td><td>8 位数字输出（写）</td></tr>
-              <tr><td>0x6200</td><td>8 位数字输入（读）</td></tr>
-              <tr><td>0x6401</td><td>模拟输入（每通道 16 位）</td></tr>
-              <tr><td>0x6411</td><td>模拟输出</td></tr>
-              <tr><td>0x6020</td><td>IO 中断使能</td></tr>
-            </tbody>
-          </table>
-          <p>IO 数据通常映射到 PDO 周期传输：输入模块用 TPDO 上报，输出模块用 RPDO 下发。</p>
-
-          <h2>6.4 EDS / DCF 配置文件</h2>
-          <h3>EDS（Electronic Data Sheet）</h3>
-          <p>EDS 是设备的<strong>电子数据表</strong>，由设备厂商提供，用 INI 文本格式描述设备的完整对象字典：对象的索引、名称、类型、属性、默认值、取值范围等。主站工具（如 CANopen Magic）导入 EDS 后就能识别设备并进行配置。</p>
-
-          <h3>DCF（Device Configuration File）</h3>
-          <p>DCF 是在 EDS 基础上<strong>填入实际参数值</strong>的配置文件，可通过 SDO 直接下载到设备，实现批量配置。<code>DCF = EDS + [实际配置值]</code>。</p>
-
-          <h3>EDS 文件结构</h3>
-          <pre><code>[FileInfo]
-FileName=MyServo.eds
-FileVersion=1
-FileRevision=0
-...
-[DeviceInfo]
-VendorName=MyMotor
-VendorNumber=0x123
-ProductName=ServoDrive
-ProductNumber=0x456
-...
-[Objects]
-1000=0x1000
-1001=0x1001
-...
-[1000]
-ParameterName=Device Type
-ObjectType=0x7
-DataType=0x0007
-AccessType=ro
-DefaultValue=0x00000192
-[1001]
-ParameterName=Error Register
-...
-[1018]
-ParameterName=Identity
-ObjectType=0x9
-SubNumber=0x5
-[1018sub0]
-ParameterName=Highest sub-index
-...
-[1018sub1]
-ParameterName=Vendor-ID
-DataType=0x0007
-AccessType=ro
-DefaultValue=0x00000123</code></pre>
-          <ul>
-            <li><code>[FileInfo]</code>：文件本身信息（版本、创建工具等）。</li>
-            <li><code>[DeviceInfo]</code>：设备身份（厂商号、产品号、版本、波特率支持、Node-ID 范围等）。</li>
-            <li><code>[Objects]</code>：对象列表。</li>
-            <li><code>[Index]</code> / <code>[IndexsubN]</code>：每个对象及其子索引的详细定义。</li>
-            <li>DCF 比 EDS 多了 <code>[DeviceComissioning]</code> 段和 <code>ParameterValue=</code> 字段，记录要下载的值。</li>
-          </ul>
-
-          <h3>配置下载流程</h3>
-          <pre><code>1. 获取设备 EDS 文件（向厂商索取或官网下载）
-2. 主站工具导入 EDS，识别设备对象字典
-3. 工具中修改参数（PDO 映射、心跳、CiA402 模式等）
-4. 生成 DCF 文件（含修改后的参数值）
-5. 主站通过 SDO 把 DCF 中的参数逐个写入设备
-6. 写 0x1010 保存参数（可选，断电不丢失）
-7. 发送 NMT Start，设备进入 Operational 运行</code></pre>
-
-          <h2>6.5 LSS —— 层设置服务（CiA 305）</h2>
-          <p>LSS（Layer Setting Services）用于<strong>动态分配 Node-ID 和波特率</strong>，无需拨码开关即可组网：</p>
-          <ul>
-            <li>固定 CAN ID：<code>0x7E4</code>（LSS 主→从）、<code>0x7E5</code>（LSS 从→主）。</li>
-            <li>先通过厂商号/产品号/版本/序列号<strong>选择</strong>目标从站（Selective），再配置其 Node-ID 与波特率。</li>
-            <li>适合同型号多设备批量上线，避免手动设地址冲突。</li>
-          </ul>
-
-          <div class="callout tip">
-            <div class="callout-title">本章小结</div>
-            <p>设备子协议让同类设备对象字典标准化：<strong>CiA 402</strong> 用 0x6040/0x6041 控制伺服状态机，用 0x6060 切换模式；<strong>EDS</strong> 描述设备、<strong>DCF</strong> 携带配置，是批量部署的标准工具；<strong>LSS</strong> 可远程分配地址。工具与参数速查见独立的 <a href="tools.html">第 7 章</a>。</p>
+            <p>SDO 走 <code>0x600/0x580 + ID</code> 读写 OD，≤4 字节用加速传输；PDO 走 <code>0x180/0x200 + ID</code> 传实时数据，靠映射打包；NMT 用 <code>0x000</code> 管状态；SYNC 用 <code>0x080</code> 同步；EMCY 用 <code>0x080+ID</code> 报警；心跳用 <code>0x700+ID</code> 报存活。</p>
           </div>
         </article>
       </section>
@@ -1489,7 +1284,6 @@ DefaultValue=0x00000123</code></pre>
 
       <nav class="pager">
         <a href="#top"><div class="label">↑ 回到顶部</div><div class="title">学习路线</div></a>
-        <a class="next" href="tools.html"><div class="label">下一页 →</div><div class="title">第 7 章 · 工具与参数速查</div></a>
       </nav>
     </main>
   </div>
@@ -1497,9 +1291,9 @@ DefaultValue=0x00000123</code></pre>
   <footer class="site-footer" id="site-footer"></footer>
   <button class="to-top" title="回到顶部">↑</button>
 
-  <script src="assets/js/ad.js?v=20261125"></script>
-  <script src="assets/js/layout.js?v=20261125"></script>
-  <script src="assets/js/main.js?v=20261125"></script>
-  <script src="assets/js/exercises.js?v=20261125"></script>
+  <script src="assets/js/ad.js?v=20261126"></script>
+  <script src="assets/js/layout.js?v=20261126"></script>
+  <script src="assets/js/main.js?v=20261126"></script>
+  <script src="assets/js/exercises.js?v=20261126"></script>
 </body>
 </html>
