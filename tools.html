@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第 7 章 工具与参数速查表 — CAN / CANopen</title>
+  <meta name="description" content="CAN/CANopen 开发工具汇总：CANoe、PCAN、SocketCAN、CANopenNode、Python canopen，附 COB-ID、NMT、SDO、CiA402 速查表与调试技巧。">
+    <style>
+:root {
+  --primary: #1e3a8a;
+  --primary-2: #0ea5e9;
+  --accent: #f59e0b;
+  --bg: #f6f8fb;
+  --surface: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --code-bg: #0f172a;
+  --code-text: #e2e8f0;
+  --radius: 0;
+  --shadow: 0 4px 20px rgba(15, 23, 42, .06);
+  --shadow-hover: 0 10px 30px rgba(30, 58, 138, .18);
+  --maxw: 1180px;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.75;
+  font-size: 16px;
+}
+a { color: var(--primary); text-decoration: none; }
+a:hover { color: var(--primary-2); }
+
+img { max-width: 100%; }
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--primary);
+  border-bottom: 1px solid rgba(255,255,255,.15);
+}
+.nav-inner {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 20px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.brand {
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: .5px;
+}
+.brand .logo {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--primary);
+  display: grid; place-items: center;
+  font-weight: 900;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.6);
+}
+.nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+.nav-links a {
+  color: rgba(255,255,255,.9);
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-size: .92rem;
+  transition: all .2s;
+}
+.nav-links a:hover { background: rgba(255,255,255,.15); color: #fff; }
+.nav-links a.active { background: rgba(255,255,255,.22); color: #fff; }
+.nav-toggle {
+  display: none;
+  margin-left: auto;
+  background: rgba(255,255,255,.18);
+  border: none;
+  color: #fff;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.layout {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 32px;
+}
+.sidebar {
+  position: sticky;
+  top: 84px;
+  align-self: start;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 14px;
+  box-shadow: var(--shadow);
+}
+.sidebar h3 {
+  margin: 4px 8px 12px;
+  font-size: .8rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.sidebar ul { list-style: none; margin: 0; padding: 0; }
+.sidebar li { margin: 2px 0; }
+.sidebar a:not(.sibling-card) {
+  display: block;
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: #334155;
+  font-size: .92rem;
+  border-left: 3px solid transparent;
+  transition: all .18s;
+}
+.sidebar a:not(.sibling-card):hover { background: #f1f5f9; color: var(--primary); }
+.sidebar a:not(.sibling-card).active {
+  background: #eff6ff;
+  color: var(--primary);
+  border-left-color: var(--primary-2);
+  font-weight: 600;
+}
+
+main.content { min-width: 0; }
+.breadcrumb {
+  font-size: .85rem;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.breadcrumb a { color: var(--muted); }
+.page-title {
+  font-size: 2rem;
+  margin: 0 0 8px;
+  color: var(--primary);
+}
+.page-sub { color: var(--muted); margin: 0 0 28px; font-size: 1.02rem; }
+
+article {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 34px 38px;
+  box-shadow: var(--shadow);
+}
+article h2 {
+  font-size: 1.5rem;
+  margin: 36px 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #eef2f7;
+  color: var(--primary);
+}
+article h3 {
+  font-size: 1.2rem;
+  margin: 26px 0 10px;
+  color: #1e293b;
+}
+article h4 { font-size: 1.02rem; margin: 18px 0 8px; color: #334155; }
+article p { margin: 0 0 14px; color: #1f2937; }
+article ul, article ol { margin: 0 0 16px; padding-left: 24px; }
+article li { margin: 4px 0; }
+article strong { color: #0f172a; }
+
+code {
+  background: #eef2ff;
+  color: #3730a3;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: .88em;
+  font-family: "JetBrains Mono", Consolas, "Courier New", monospace;
+}
+
+pre {
+  background: var(--code-bg);
+  color: var(--code-text);
+  padding: 16px 18px;
+  border-radius: 0;
+  overflow-x: auto;
+  font-size: .86rem;
+  line-height: 1.6;
+  margin: 0 0 18px;
+  border: 1px solid #1e293b;
+}
+pre code { background: none; color: inherit; padding: 0; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 20px;
+  font-size: .92rem;
+  display: block;
+  overflow-x: auto;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 9px 12px;
+  text-align: left;
+  white-space: nowrap;
+}
+th {
+  background: #f1f5f9;
+  color: var(--primary);
+  font-weight: 700;
+}
+tr:nth-child(even) td { background: #fafbfd; }
+
+.callout {
+  border-left: 4px solid;
+  background: #f8fafc;
+  padding: 12px 16px;
+  border-radius: 0;
+  margin: 0 0 18px;
+  font-size: .94rem;
+}
+.callout.tip { border-color: #10b981; background: #ecfdf5; }
+.callout.warn { border-color: #f59e0b; background: #fffbeb; }
+.callout.danger { border-color: #ef4444; background: #fef2f2; }
+.callout.info { border-color: #0ea5e9; background: #f0f9ff; }
+.callout p:last-child { margin-bottom: 0; }
+.callout-title { font-weight: 700; margin-bottom: 3px; }
+
+.frame {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin: 14px 0 6px;
+  font-family: "JetBrains Mono", Consolas, monospace;
+  font-size: .78rem;
+}
+.frame span {
+  background: #dbeafe;
+  color: #1e3a8a;
+  padding: 6px 8px;
+  border-radius: 0;
+  border: 1px solid #bfdbfe;
+  text-align: center;
+  min-width: 52px;
+  font-weight: 600;
+}
+.frame span.alt { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+.frame span.alt2 { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
+.frame span.alt3 { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+.frame-note { font-size: .8rem; color: var(--muted); margin-bottom: 18px; }
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin: 18px 0;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  transition: background .2s, border-color .2s;
+  display: block;
+  color: inherit;
+}
+.card:hover {
+  border-color: var(--primary-2);
+  background: #f8fafc;
+}
+.card .icon { font-size: 1.8rem; margin-bottom: 8px; }
+.card h4 { margin: 0 0 4px; color: var(--primary); }
+.card p { margin: 0; font-size: .88rem; color: var(--muted); }
+
+.hero {
+  background: var(--primary);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 48px 40px;
+  margin-bottom: 28px;
+}
+.hero h1 { font-size: 2.3rem; margin: 0 0 10px; }
+.hero p { font-size: 1.1rem; opacity: .92; max-width: 720px; margin: 0 0 20px; }
+.hero .tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.hero .tag {
+  background: rgba(255,255,255,.18);
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: .82rem;
+}
+.hero-cta { margin-top: 22px; display: flex; gap: 12px; flex-wrap: wrap; }
+.btn {
+  display: inline-block;
+  padding: 10px 22px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: .95rem;
+  transition: all .2s;
+  cursor: pointer;
+  border: none;
+}
+.btn-primary { background: #fff; color: var(--primary); }
+.btn-primary:hover { background: #f1f5f9; }
+.btn-ghost { background: rgba(255,255,255,.18); color: #fff; border: 1px solid rgba(255,255,255,.5); }
+.btn-ghost:hover { background: rgba(255,255,255,.3); color: #fff; }
+
+.pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+.pager a {
+  flex: 1;
+  min-width: 200px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  transition: all .2s;
+}
+.pager a:hover { border-color: var(--primary-2); box-shadow: var(--shadow); }
+.pager .label { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.pager .title { font-weight: 700; color: var(--primary); margin-top: 2px; }
+.pager .next { text-align: right; }
+
+.site-footer {
+  background: #0f172a;
+  color: #94a3b8;
+  padding: 30px 20px;
+  margin-top: 40px;
+  font-size: .88rem;
+}
+.footer-inner {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.footer-inner a { color: #cbd5e1; }
+.footer-inner a:hover { color: #fff; }
+
+.to-top {
+  position: fixed;
+  right: 22px; bottom: 22px;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-hover);
+  opacity: 0;
+  pointer-events: none;
+  transition: all .25s;
+  z-index: 40;
+}
+.to-top.show { opacity: 1; pointer-events: auto; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed;
+    top: 60px; left: 0;
+    width: 260px; height: calc(100vh - 60px);
+    border-radius: 0;
+    transform: translateX(-100%);
+    transition: transform .25s;
+    z-index: 60;
+  }
+  .sidebar.open { transform: translateX(0); }
+  .nav-toggle { display: block; }
+  .nav-links { display: none; }
+  article { padding: 22px 18px; }
+  .hero { padding: 32px 22px; }
+  .hero h1 { font-size: 1.7rem; }
+  .page-title { font-size: 1.6rem; }
+}
+.scrim {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(15,23,42,.4);
+  z-index: 55;
+}
+.scrim.show { display: block; }
+
+.exercises { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
+.exercises-title { font-size: 1.4rem; color: var(--primary); margin: 0 0 6px; }
+.exercises-desc { color: #64748b; font-size: .9rem; margin: 0 0 18px; }
+.exercises-list { list-style: none; padding: 0; margin: 0 0 18px; }
+.ex-item { margin-bottom: 16px; }
+.ex-q { font-weight: 600; color: #1e293b; margin-bottom: 6px; line-height: 1.6; }
+.ex-input {
+  width: 100%; box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  font-size: .92rem; font-family: inherit;
+  resize: vertical; background: #fff;
+}
+.ex-input:focus { outline: none; border-color: var(--primary-2); }
+.ex-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.ex-hint { color: #94a3b8; font-size: .82rem; }
+
+.nav-export {
+  background: rgba(255,255,255,.15); color: #fff;
+  border: 1px solid rgba(255,255,255,.4);
+  padding: 7px 14px; border-radius: 999px;
+  cursor: pointer; font-size: .85rem;
+}
+.nav-export:hover { background: rgba(255,255,255,.28); }
+
+.ex-tag {
+  display: inline-block;
+  font-size: .72rem; font-weight: 500;
+  background: var(--primary); color: #fff;
+  padding: 1px 8px; border-radius: 999px;
+  margin-left: 8px; vertical-align: middle;
+}
+.ex-options { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.ex-opt {
+  display: flex; align-items: flex-start; gap: 8px;
+  cursor: pointer; padding: 8px 12px;
+  border: 1px solid var(--border);
+  background: #fff;
+}
+.ex-opt:hover { background: #f8fafc; border-color: var(--primary-2); }
+.ex-opt input { margin-top: 4px; }
+.ex-opt-letter { font-weight: 700; color: var(--primary); min-width: 16px; }
+  </style>
+  <script src="assets/js/analytics.js?v=20261125"></script>
+</head>
+<body>
+  <header class="site-header" id="site-header"></header>
+  <div class="scrim"></div>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="content">
+      <div class="breadcrumb"><a href="index.html">首页</a> / 工具速查</div>
+      <h1 class="page-title">第 7 章 · 工具与参数速查</h1>
+      <p class="page-sub">工欲善其事，必先利其器。本章汇总常用硬件、软件、开源栈，并提供可随时查阅的速查表与调试清单。</p>
+
+      <div id="ad-top"></div>
+
+      <article>
+        <h2>7.1 硬件工具（CAN 接口卡）</h2>
+        <table>
+          <thead><tr><th>品牌 / 型号</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>PEAK PCAN-USB / PCAN-PCI</td><td>最常用的 USB CAN 卡，驱动完善，支持 Linux SocketCAN</td></tr>
+            <tr><td>Kvaser Leaf / USBcan</td><td>稳定可靠，配套 CanKing 软件</td></tr>
+            <tr><td>Vector VN1630 / VN1610 / XL</td><td>高端，配套 CANoe/CANalyzer，汽车行业标准</td></tr>
+            <tr><td>周立功 USBCAN-2E-U</td><td>国产高性价比，配套 CANTest / 上位机</td></tr>
+            <tr><td>CANalyst-II</td><td>国产入门级，支持 CAN 高层协议分析</td></tr>
+            <tr><td>Waveshare CAN Hat</td><td>树莓派扩展板，跑 SocketCAN 做实验很方便</td></tr>
+          </tbody>
+        </table>
+
+        <h2>7.2 软件工具</h2>
+        <div class="card-grid">
+          <div class="card"><h4>CANoe / CANalyzer</h4><p>Vector 出品，汽车/工业总线分析的事实标准，支持 CANopen 插件。</p></div>
+          <div class="card"><h4>PCAN-View / Explorer</h4><p>PEAK 配套，免费看报文，Explorer 支持信号解析与 CANopen。</p></div>
+          <div class="card"><h4>CANopen Magic</h4><p>专门的 CANopen 主站/配置工具，导入 EDS、扫从站、配 PDO 一站式。</p></div>
+          <div class="card"><h4>Wireshark + cangw</h4><p>抓 CAN 报文，加载 CANopen 解析器后可看到 SDO/PDO 语义。</p></div>
+          <div class="card"><h4>SocketCAN 工具集</h4><p>Linux 原生：candump / cansend / cangen / canplayer，免费强大。</p></div>
+          <div class="card"><h4>python-can / canopen</h4><p>Python 库，快速写脚本读写 CANopen 设备，自动化测试首选。</p></div>
+        </div>
+
+        <h2>7.3 开源协议栈</h2>
+        <table>
+          <thead><tr><th>项目</th><th>语言</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>CANopenNode</td><td>C</td><td>免费开源、可移植的 CANopen 从站/主站协议栈，STM32/嵌入式常用</td></tr>
+            <tr><td>CANfestival</td><td>C</td><td>老牌开源 CANopen 协议栈，配套对象字典编辑器</td></tr>
+            <tr><td>lely-core</td><td>C++</td><td>工业级开源 CANopen 主站，支持 CiA 302、402</td></tr>
+            <tr><td>python-can</td><td>Python</td><td>统一的 CAN 硬件抽象层</td></tr>
+            <tr><td>canopen (Python)</td><td>Python</td><td>基于 python-can 的 CANopen 主站库，支持 EDS/SDO/PDO/NMT</td></tr>
+          </tbody>
+        </table>
+
+        <h2>7.4 Linux SocketCAN 命令速查</h2>
+        <pre><code># 1. 加载内核模块
+sudo modprobe can
+sudo modprobe can_raw
+sudo modprobe vcan          # 虚拟 CAN，无硬件也能练习
+
+# 2. 配置并启动接口
+sudo ip link set can0 up type can bitrate 500000
+# 或带采样点等参数：
+sudo ip link set can0 type can bitrate 500000 sample-point 0.875
+
+# 虚拟接口：
+sudo ip link add dev vcan0 type vcan
+sudo ip link set up vcan0
+
+# 3. 查看接口状态
+ip -details link show can0
+
+# 4. 抓包（所有报文，含时间戳）
+candump -tz can0          # -t 绝对时间, -z 带方向标记
+candump can0,123:7FF      # 过滤 ID 0x123
+candump -L can0 > log.asc # 保存为 ASC 格式
+
+# 5. 发一帧
+cansend can0 123#1122334455667788
+cansend can0 000#0105     # NMT 启动 5 号节点
+
+# 6. 随机流量（压测）
+cangen can0 -g 10 -I 185  # 每 10ms 发 ID 0x185
+cangen can0               # 全随机
+
+# 7. 回放
+canplayer -I log.asc can0=can0
+
+# 8. 查看错误计数器 / 总线状态
+ip -s link show can0</code></pre>
+
+        <h2>7.5 Python canopen 快速示例</h2>
+        <pre><code>import canopen
+
+# 连接到 CAN 总线（python-can 的总线）
+network = canopen.Network()
+network.connect(channel='can0', bustype='socketcan')
+
+# 添加从站（用 EDS 文件，没有也可以基本通信）
+node = network.add_node(5, 'MyServo.eds')   # 或 add_node(5, None)
+
+# SDO 读对象字典
+print(node.sdo[0x1018][1].raw)   # Vendor ID
+print(node.sdo['Producer Heartbeat Time'].raw)  # 0x1017 名称访问
+
+# SDO 写
+node.sdo[0x1017].raw = 500        # 心跳 500ms
+
+# 启动节点
+network.send_message(0x000, [0x01, 0x05])   # NMT 启动 5 号
+
+# PDO 映射（示例：配置 TPDO1）
+node.tpdo.read()
+node.tpdo[1].clear()
+node.tpdo[1].add_variable(0x6041)        # 状态字
+node.tpdo[1].add_variable(0x6064)        # 实际位置
+node.tpdo[1].trans_type = 1              # 每 SYNC 发一次
+node.tpdo[1].event_timer = 100           # 100ms 保底
+node.tpdo[1].enabled = True
+node.tpdo.save()
+
+network.sync.start(0.01)  # 10ms SYNC
+node.tpdo[1].wait_for_reception()
+print('实际位置:', node.tpdo[1]['Position actual value'].phys)
+
+network.sync.stop()
+network.disconnect()</code></pre>
+
+        <h2>7.6 速查表</h2>
+
+        <h3>预定义 COB-ID（Node-ID = N）</h3>
+        <table>
+          <thead><tr><th>对象</th><th>COB-ID</th><th>对象</th><th>COB-ID</th></tr></thead>
+          <tbody>
+            <tr><td>NMT</td><td>0x000</td><td>SYNC</td><td>0x080</td></tr>
+            <tr><td>TIME</td><td>0x100</td><td>EMCY</td><td>0x080 + N</td></tr>
+            <tr><td>SDO 请求（→从）</td><td>0x600 + N</td><td>SDO 响应（从→）</td><td>0x580 + N</td></tr>
+            <tr><td>TPDO1 / RPDO1</td><td>0x180+N / 0x200+N</td><td>TPDO2 / RPDO2</td><td>0x280+N / 0x300+N</td></tr>
+            <tr><td>TPDO3 / RPDO3</td><td>0x380+N / 0x400+N</td><td>TPDO4 / RPDO4</td><td>0x480+N / 0x500+N</td></tr>
+            <tr><td>心跳 / 节点守护</td><td>0x700 + N</td><td>LSS 主→从 / 从→主</td><td>0x7E4 / 0x7E5</td></tr>
+          </tbody>
+        </table>
+
+        <h3>NMT 命令码</h3>
+        <table>
+          <thead><tr><th>命令</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>0x01</td><td>Start（进入 Operational）</td></tr>
+            <tr><td>0x02</td><td>Stop（进入 Stopped）</td></tr>
+            <tr><td>0x80</td><td>进入 Pre-operational</td></tr>
+            <tr><td>0x81</td><td>复位节点</td></tr>
+            <tr><td>0x82</td><td>复位通信</td></tr>
+          </tbody>
+        </table>
+
+        <h3>心跳 / Boot-up 状态值</h3>
+        <table>
+          <thead><tr><th>值</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr><td>0x00</td><td>Boot-up（启动）</td></tr>
+            <tr><td>0x04</td><td>Stopped</td></tr>
+            <tr><td>0x05</td><td>Operational</td></tr>
+            <tr><td>0x7F</td><td>Pre-operational</td></tr>
+          </tbody>
+        </table>
+
+        <h3>SDO 命令码</h3>
+        <table>
+          <thead><tr><th>读请求</th><th>读响应</th><th>写请求</th><th>写响应</th><th>错误</th></tr></thead>
+          <tbody>
+            <tr><td>0x40</td><td>0x43 (4B) / 0x4B (2B) / 0x4F (1B) / 0x42 (分段)</td><td>0x23 (4B) / 0x2B (2B) / 0x2F (1B) / 0x20 (分段)</td><td>0x60</td><td>0x80</td></tr>
+          </tbody>
+        </table>
+
+        <h3>常用 OD 索引</h3>
+        <table>
+          <thead><tr><th>索引</th><th>名称</th><th>索引</th><th>名称</th></tr></thead>
+          <tbody>
+            <tr><td>0x1000</td><td>设备类型</td><td>0x1001</td><td>错误寄存器</td></tr>
+            <tr><td>0x1008/9/A</td><td>设备名/硬件/软件版本</td><td>0x1010</td><td>保存参数</td></tr>
+            <tr><td>0x1014</td><td>COB-ID EMCY</td><td>0x1016</td><td>消费心跳</td></tr>
+            <tr><td>0x1017</td><td>生产心跳周期</td><td>0x1018</td><td>设备身份</td></tr>
+            <tr><td>0x1200</td><td>SDO 服务器参数</td><td>0x1400 / 0x1600</td><td>RPDO 通信 / 映射</td></tr>
+            <tr><td>0x1800 / 0x1A00</td><td>TPDO 通信 / 映射</td><td>0x6040/0x6041</td><td>CiA402 控制字/状态字</td></tr>
+            <tr><td>0x6060/0x6061</td><td>模式设置/显示</td><td>0x607A/0x6064</td><td>目标/实际位置</td></tr>
+          </tbody>
+        </table>
+
+        <h3>CiA 402 模式</h3>
+        <table>
+          <thead><tr><th>1</th><th>3</th><th>4</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead>
+          <tbody>
+            <tr><td>PP 轮廓位置</td><td>PV 轮廓速度</td><td>PT 轮廓转矩</td><td>HM 回零</td><td>IP 插补</td><td>CSP 循环同步位置</td><td>CSV 循环同步速度</td><td>CST 循环同步转矩</td></tr>
+          </tbody>
+        </table>
+
+        <h3>EMCY 错误码</h3>
+        <table>
+          <thead><tr><th>码</th><th>类别</th><th>码</th><th>类别</th></tr></thead>
+          <tbody>
+            <tr><td>0x0000</td><td>复位/无错</td><td>0x20xx</td><td>电压</td></tr>
+            <tr><td>0x10xx</td><td>通用</td><td>0x30xx</td><td>温度</td></tr>
+            <tr><td>0x40xx</td><td>通信</td><td>0x50xx</td><td>配置</td></tr>
+            <tr><td>0x60xx</td><td>软件</td><td>0x80xx</td><td>监控</td></tr>
+          </tbody>
+        </table>
+
+        <h2>7.7 常见问题调试清单</h2>
+        <div class="callout warn">
+          <div class="callout-title">问题：完全没有报文 / 节点不在线</div>
+          <ol>
+            <li>万用表测 CAN_H–CAN_L 电阻 ≈ 60 Ω（两端各 120 Ω 并联）。</li>
+            <li>确认所有节点波特率一致（看 0x1018、配置工具）。</li>
+            <li>用示波器看有无 SOF 边沿，判断是发不出还是被干扰。</li>
+            <li>检查 GND 是否共地、供电是否正常。</li>
+          </ol>
+        </div>
+        <div class="callout warn">
+          <div class="callout-title">问题：节点频繁进 Bus-Off</div>
+          <ol>
+            <li>同上检查终端电阻与拓扑。</li>
+            <li>线缆过长或靠近干扰源（电机、变频器），加屏蔽层并单端接地。</li>
+            <li>位时序采样点不一致，统一配置（建议 87.5%）。</li>
+            <li>用 <code>ip -s link show can0</code> 看 rx/tx 错误计数。</li>
+          </ol>
+        </div>
+        <div class="callout warn">
+          <div class="callout-title">问题：SDO 能通，但 PDO 不发</div>
+          <ol>
+            <li>确认节点已进入 Operational（NMT 0x01）。Pre-op 状态下 PDO 不传输。</li>
+            <li>检查 0x1800 子索引 1 的 COB-ID 最高位是否被置 1（禁用）。</li>
+            <li>检查传输类型 0x1800:02：异步需 0x1800:05 事件定时器；同步需有 SYNC。</li>
+            <li>PDO 映射对象是否 mappable、总长是否 ≤ 8 字节。</li>
+          </ol>
+        </div>
+        <div class="callout warn">
+          <div class="callout-title">问题：CiA 402 伺服不使能</div>
+          <ol>
+            <li>读 0x6041，看 bit3 Fault 是否置位 → 写 0x6040 = 0x80 复位。</li>
+            <li>检查 0x6041 bit4 电压是否正常、bit5 快停是否触发。</li>
+            <li>按 0x06 → 0x07 → 0x0F 顺序写控制字，不要跳步。</li>
+            <li>看 EMCY（0x080+ID）具体错误码定位硬件故障。</li>
+          </ol>
+        </div>
+
+        <div class="callout tip">
+          <div class="callout-title">恭喜完成全部教程！</div>
+          <p>从 CAN 物理层到 CANopen 应用层，再到设备子协议与工程工具，你已经建立了完整的知识体系。建议下一步：用一块 CAN 卡 + 一个支持 CANopen 的从站（或开源 CANopenNode 跑在 STM32 上），跟着 <a href="tools.html">第 7 章</a> 的命令亲手抓一遍报文，理解会更加透彻。</p>
+          <p>← 返回 <a href="index.html">首页</a> 重温学习路线。</p>
+        </div>
+      </article>
+
+      <div id="ad-bottom"></div>
+
+      <nav class="pager">
+        <a href="index.html#ch6"><div class="label">← 上一章</div><div class="title">第 6 章 · 设备子协议与 EDS/DCF</div></a>
+        <a class="next" href="index.html"><div class="label">返回首页 →</div><div class="title">学习路线</div></a>
+      </nav>
+    </main>
+  </div>
+
+  <footer class="site-footer" id="site-footer"></footer>
+  <button class="to-top" title="回到顶部">↑</button>
+
+  <script src="assets/js/ad.js?v=20261125"></script>
+  <script src="assets/js/layout.js?v=20261125"></script>
+  <script src="assets/js/main.js?v=20261125"></script>
+  <script src="assets/js/exercises.js?v=20261125"></script>
+</body>
+</html>
