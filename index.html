@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAN / CANopen 协议完整学习站 — 从入门到实战（单页版）</title>
+  <meta name="description" content="系统学习 CAN 总线与 CANopen 协议：物理层、帧格式、对象字典、SDO/PDO/NMT、设备子协议，单页通读，附每章练习与速查表。">
+    <style>
+:root {
+  --primary: #1e3a8a;
+  --primary-2: #0ea5e9;
+  --accent: #f59e0b;
+  --bg: #f6f8fb;
+  --surface: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --code-bg: #0f172a;
+  --code-text: #e2e8f0;
+  --radius: 0;
+  --shadow: 0 4px 20px rgba(15, 23, 42, .06);
+  --shadow-hover: 0 10px 30px rgba(30, 58, 138, .18);
+  --maxw: 1180px;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.75;
+  font-size: 16px;
+}
+a { color: var(--primary); text-decoration: none; }
+a:hover { color: var(--primary-2); }
+
+img { max-width: 100%; }
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--primary);
+  border-bottom: 1px solid rgba(255,255,255,.15);
+}
+.nav-inner {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 20px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.brand {
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  letter-spacing: .5px;
+}
+.brand .logo {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--primary);
+  display: grid; place-items: center;
+  font-weight: 900;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.6);
+}
+.nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+.nav-links a {
+  color: rgba(255,255,255,.9);
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-size: .92rem;
+  transition: all .2s;
+}
+.nav-links a:hover { background: rgba(255,255,255,.15); color: #fff; }
+.nav-links a.active { background: rgba(255,255,255,.22); color: #fff; }
+.nav-toggle {
+  display: none;
+  margin-left: auto;
+  background: rgba(255,255,255,.18);
+  border: none;
+  color: #fff;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.layout {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 32px;
+}
+.sidebar {
+  position: sticky;
+  top: 84px;
+  align-self: start;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 14px;
+  box-shadow: var(--shadow);
+}
+.sidebar h3 {
+  margin: 4px 8px 12px;
+  font-size: .8rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.sidebar ul { list-style: none; margin: 0; padding: 0; }
+.sidebar li { margin: 2px 0; }
+.sidebar a:not(.sibling-card) {
+  display: block;
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: #334155;
+  font-size: .92rem;
+  border-left: 3px solid transparent;
+  transition: all .18s;
+}
+.sidebar a:not(.sibling-card):hover { background: #f1f5f9; color: var(--primary); }
+.sidebar a:not(.sibling-card).active {
+  background: #eff6ff;
+  color: var(--primary);
+  border-left-color: var(--primary-2);
+  font-weight: 600;
+}
+
+main.content { min-width: 0; }
+.breadcrumb {
+  font-size: .85rem;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.breadcrumb a { color: var(--muted); }
+.page-title {
+  font-size: 2rem;
+  margin: 0 0 8px;
+  color: var(--primary);
+}
+.page-sub { color: var(--muted); margin: 0 0 28px; font-size: 1.02rem; }
+
+article {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 34px 38px;
+  box-shadow: var(--shadow);
+}
+article h2 {
+  font-size: 1.5rem;
+  margin: 36px 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #eef2f7;
+  color: var(--primary);
+}
+article h3 {
+  font-size: 1.2rem;
+  margin: 26px 0 10px;
+  color: #1e293b;
+}
+article h4 { font-size: 1.02rem; margin: 18px 0 8px; color: #334155; }
+article p { margin: 0 0 14px; color: #1f2937; }
+article ul, article ol { margin: 0 0 16px; padding-left: 24px; }
+article li { margin: 4px 0; }
+article strong { color: #0f172a; }
+
+code {
+  background: #eef2ff;
+  color: #3730a3;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: .88em;
+  font-family: "JetBrains Mono", Consolas, "Courier New", monospace;
+}
+
+pre {
+  background: var(--code-bg);
+  color: var(--code-text);
+  padding: 16px 18px;
+  border-radius: 0;
+  overflow-x: auto;
+  font-size: .86rem;
+  line-height: 1.6;
+  margin: 0 0 18px;
+  border: 1px solid #1e293b;
+}
+pre code { background: none; color: inherit; padding: 0; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 20px;
+  font-size: .92rem;
+  display: block;
+  overflow-x: auto;
+}
+th, td {
+  border: 1px solid var(--border);
+  padding: 9px 12px;
+  text-align: left;
+  white-space: nowrap;
+}
+th {
+  background: #f1f5f9;
+  color: var(--primary);
+  font-weight: 700;
+}
+tr:nth-child(even) td { background: #fafbfd; }
+
+.callout {
+  border-left: 4px solid;
+  background: #f8fafc;
+  padding: 12px 16px;
+  border-radius: 0;
+  margin: 0 0 18px;
+  font-size: .94rem;
+}
+.callout.tip { border-color: #10b981; background: #ecfdf5; }
+.callout.warn { border-color: #f59e0b; background: #fffbeb; }
+.callout.danger { border-color: #ef4444; background: #fef2f2; }
+.callout.info { border-color: #0ea5e9; background: #f0f9ff; }
+.callout p:last-child { margin-bottom: 0; }
+.callout-title { font-weight: 700; margin-bottom: 3px; }
+
+.frame {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin: 14px 0 6px;
+  font-family: "JetBrains Mono", Consolas, monospace;
+  font-size: .78rem;
+}
+.frame span {
+  background: #dbeafe;
+  color: #1e3a8a;
+  padding: 6px 8px;
+  border-radius: 0;
+  border: 1px solid #bfdbfe;
+  text-align: center;
+  min-width: 52px;
+  font-weight: 600;
+}
+.frame span.alt { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+.frame span.alt2 { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
+.frame span.alt3 { background: #fef3c7; color: #92400e; border-color: #fde68a; }
+.frame-note { font-size: .8rem; color: var(--muted); margin-bottom: 18px; }
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin: 18px 0;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  transition: background .2s, border-color .2s;
+  display: block;
+  color: inherit;
+}
+.card:hover {
+  border-color: var(--primary-2);
+  background: #f8fafc;
+}
+.card .icon { font-size: 1.8rem; margin-bottom: 8px; }
+.card h4 { margin: 0 0 4px; color: var(--primary); }
+.card p { margin: 0; font-size: .88rem; color: var(--muted); }
+
+.hero {
+  background: var(--primary);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 48px 40px;
+  margin-bottom: 28px;
+}
+.hero h1 { font-size: 2.3rem; margin: 0 0 10px; }
+.hero p { font-size: 1.1rem; opacity: .92; max-width: 720px; margin: 0 0 20px; }
+.hero .tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.hero .tag {
+  background: rgba(255,255,255,.18);
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: .82rem;
+}
+.hero-cta { margin-top: 22px; display: flex; gap: 12px; flex-wrap: wrap; }
+.btn {
+  display: inline-block;
+  padding: 10px 22px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: .95rem;
+  transition: all .2s;
+  cursor: pointer;
+  border: none;
+}
+.btn-primary { background: #fff; color: var(--primary); }
+.btn-primary:hover { background: #f1f5f9; }
+.btn-ghost { background: rgba(255,255,255,.18); color: #fff; border: 1px solid rgba(255,255,255,.5); }
+.btn-ghost:hover { background: rgba(255,255,255,.3); color: #fff; }
+
+.pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+.pager a {
+  flex: 1;
+  min-width: 200px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  transition: all .2s;
+}
+.pager a:hover { border-color: var(--primary-2); box-shadow: var(--shadow); }
+.pager .label { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.pager .title { font-weight: 700; color: var(--primary); margin-top: 2px; }
+.pager .next { text-align: right; }
+
+.site-footer {
+  background: #0f172a;
+  color: #94a3b8;
+  padding: 30px 20px;
+  margin-top: 40px;
+  font-size: .88rem;
+}
+.footer-inner {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.footer-inner a { color: #cbd5e1; }
+.footer-inner a:hover { color: #fff; }
+
+.to-top {
+  position: fixed;
+  right: 22px; bottom: 22px;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-hover);
+  opacity: 0;
+  pointer-events: none;
+  transition: all .25s;
+  z-index: 40;
+}
+.to-top.show { opacity: 1; pointer-events: auto; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed;
+    top: 60px; left: 0;
+    width: 260px; height: calc(100vh - 60px);
+    border-radius: 0;
+    transform: translateX(-100%);
+    transition: transform .25s;
+    z-index: 60;
+  }
+  .sidebar.open { transform: translateX(0); }
+  .nav-toggle { display: block; }
+  .nav-links { display: none; }
+  article { padding: 22px 18px; }
+  .hero { padding: 32px 22px; }
+  .hero h1 { font-size: 1.7rem; }
+  .page-title { font-size: 1.6rem; }
+}
+.scrim {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(15,23,42,.4);
+  z-index: 55;
+}
+.scrim.show { display: block; }
+
+.exercises { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
+.exercises-title { font-size: 1.4rem; color: var(--primary); margin: 0 0 6px; }
+.exercises-desc { color: #64748b; font-size: .9rem; margin: 0 0 18px; }
+.exercises-list { list-style: none; padding: 0; margin: 0 0 18px; }
+.ex-item { margin-bottom: 16px; }
+.ex-q { font-weight: 600; color: #1e293b; margin-bottom: 6px; line-height: 1.6; }
+.ex-input {
+  width: 100%; box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  font-size: .92rem; font-family: inherit;
+  resize: vertical; background: #fff;
+}
+.ex-input:focus { outline: none; border-color: var(--primary-2); }
+.ex-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.ex-hint { color: #94a3b8; font-size: .82rem; }
+
+.nav-export {
+  background: rgba(255,255,255,.15); color: #fff;
+  border: 1px solid rgba(255,255,255,.4);
+  padding: 7px 14px; border-radius: 999px;
+  cursor: pointer; font-size: .85rem;
+}
+.nav-export:hover { background: rgba(255,255,255,.28); }
+
+.ex-tag {
+  display: inline-block;
+  font-size: .72rem; font-weight: 500;
+  background: var(--primary); color: #fff;
+  padding: 1px 8px; border-radius: 999px;
+  margin-left: 8px; vertical-align: middle;
+}
+.ex-options { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.ex-opt {
+  display: flex; align-items: flex-start; gap: 8px;
+  cursor: pointer; padding: 8px 12px;
+  border: 1px solid var(--border);
+  background: #fff;
+}
+.ex-opt:hover { background: #f8fafc; border-color: var(--primary-2); }
+.ex-opt input { margin-top: 4px; }
+.ex-opt-letter { font-weight: 700; color: var(--primary); min-width: 16px; }
+  </style>
+  <script src="assets/js/analytics.js?v=20261125"></script>
+</head>
+<body>
+  <header class="site-header" id="site-header"></header>
+  <div class="scrim"></div>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="content" id="top">
+
+      <!-- ============ 首页 / 学习路线 ============ -->
+      <section class="hero">
+        <h1>CAN / CANopen 协议完整学习</h1>
+        <p>从 CAN 总线的物理层与帧仲裁，到 CANopen 的对象字典、SDO/PDO/NMT 与设备子协议——一套面向嵌入式与工业自动化工程师的系统化教程。本页已融合前 6 章，可单页通读；工具速查单独成页。</p>
+        <div class="tags">
+          <span class="tag">ISO 11898</span>
+          <span class="tag">CiA 301</span>
+          <span class="tag">CiA 402</span>
+          <span class="tag">对象字典</span>
+          <span class="tag">PDO / SDO / NMT</span>
+        </div>
+        <div class="hero-cta">
+          <a href="#ch1" class="btn btn-primary">开始学习 →</a>
+          <a href="tools.html" class="btn btn-ghost">查看速查表</a>
+        </div>
+      </section>
+
+      <article>
+        <h2>学习路线</h2>
+        <p>建议按以下顺序学习。先掌握 CAN 底层，再理解 CANopen 如何在其上构建应用层。点击卡片即可跳转到对应章节。</p>
+
+        <div class="card-grid">
+          <a class="card" href="#ch1">
+            <h4>第 1 章 · CAN 基础</h4>
+            <p>历史、特点、物理层、差分信号与总线仲裁机制。</p>
+          </a>
+          <a class="card" href="#ch2">
+            <h4>第 2 章 · 帧格式与时序</h4>
+            <p>标准/扩展帧位域、位时序、错误帧与故障界定。</p>
+          </a>
+          <a class="card" href="#ch3">
+            <h4>第 3 章 · CANopen 概述</h4>
+            <p>通信模型、设备模型、CiA 301 核心概念。</p>
+          </a>
+          <a class="card" href="#ch4">
+            <h4>第 4 章 · 对象字典</h4>
+            <p>索引、子索引、数据类型与 OD 结构全解。</p>
+          </a>
+          <a class="card" href="#ch5">
+            <h4>第 5 章 · 通信对象</h4>
+            <p>SDO、PDO、NMT、SYNC、EMCY、心跳 实战。</p>
+          </a>
+          <a class="card" href="#ch6">
+            <h4>第 6 章 · 设备子协议</h4>
+            <p>CiA 401 I/O、CiA 402 驱动、EDS/DCF 配置文件。</p>
+          </a>
+          <a class="card" href="tools.html">
+            <h4>第 7 章 · 工具与速查</h4>
+            <p>CANoe、PCAN、Wireshark、cangw 命令速查。</p>
+          </a>
+        </div>
+
+        <h2>CAN 与 CANopen 的关系</h2>
+        <p>CAN（Controller Area Network）是 ISO 11898 定义的<strong>串行通信总线</strong>，只规定了物理层和数据链路层（报文怎么发、怎么仲裁、怎么检错）。它本身不解释“数据字节代表什么”。</p>
+        <p>CANopen 是构建在 CAN 之上的<strong>应用层协议</strong>（CiA 301），它定义了设备如何描述自己（对象字典）、如何交换数据（通信对象）、如何管理网络（NMT）。打个比方：</p>
+        <div class="callout info">
+          <div class="callout-title">类比</div>
+          <p>CAN 像“公路系统”（路面、车道、红绿灯规则）；CANopen 像“交通规则与货物标准”（车辆类型、货物标签、调度命令）。同样的公路上可以跑 CANopen、DeviceNet、J1939 等不同应用层协议。</p>
+        </div>
+
+        <h2>为什么要学 CANopen</h2>
+        <ul>
+          <li><strong>工业自动化主流</strong>：PLC、伺服驱动、传感器、IO 模块广泛使用 CANopen。</li>
+          <li><strong>汽车与特种车辆</strong>：商用车、工程机械、农业机械大量采用 CANopen 派生协议。</li>
+          <li><strong>机器人与医疗</strong>：关节驱动、传感网络常基于 CANopen（CiA 402）。</li>
+          <li><strong>标准化配置</strong>：EDS/DCF 文件让设备即插即用，省去大量底层调试。</li>
+        </ul>
+
+        <h2>预备知识</h2>
+        <p>学习本站教程，建议具备：</p>
+        <ul>
+          <li>基本的数字电路与二进制 / 十六进制换算能力。</li>
+          <li>了解 UART / SPI / I2C 等至少一种串行通信。</li>
+          <li>基本的 C 语言阅读能力（示例代码用 C 描述）。</li>
+        </ul>
+        <div class="callout tip">
+          <div class="callout-title">零基础？</div>
+          <p>没有问题。第 1、2 章会从最基础的差分信号讲起，逐步过渡到位级时序。遇到不懂的术语可随时查阅 <a href="tools.html">工具速查</a>。</p>
+        </div>
+      </article>
+
+      <!-- ============ 第 1 章 ============ -->
+      <section class="chapter" id="ch1" data-chapter="can-basics">
+        <div class="breadcrumb"><a href="#top">首页</a> / CAN 基础</div>
+        <h1 class="page-title">第 1 章 · CAN 基础与物理层</h1>
+        <p class="page-sub">理解 CAN 总线是什么、为什么抗干扰强、以及节点如何在同一根线上“文明地”抢着说话。</p>
+
+        <article>
+          <h2>1.1 什么是 CAN</h2>
+          <p>CAN（Controller Area Network，控制器局域网）是一种<strong>多主、串行、异步、差分</strong>的现场总线。它由德国 Bosch 公司于 1986 年提出，最初用于汽车内部的 ECU（电子控制单元）互联，如今已广泛应用于工业自动化、工程机械、轨道交通、医疗设备等领域。</p>
+          <ul>
+            <li><strong>1991</strong>：Bosch 发布 CAN 2.0 规范（2.0A 标准帧 / 2.0B 扩展帧）。</li>
+            <li><strong>1993</strong>：成为国际标准 <code>ISO 11898</code>（高速 CAN）和 <code>ISO 11519</code>（低速容错 CAN）。</li>
+            <li><strong>2012</strong>：Bosch 发布 CAN FD（Flexible Data-rate），支持更高带宽与更长数据场。</li>
+          </ul>
+          <p>CAN 只定义了<strong>物理层</strong>和<strong>数据链路层</strong>（介质访问控制 + 逻辑链路控制），不规定应用层语义。这也是为什么在同一 CAN 总线上可以同时存在 CANopen、DeviceNet、J1939 等不同应用层协议。</p>
+
+          <h2>1.2 CAN 的核心特点</h2>
+          <ul>
+            <li><strong>多主（Multi-master）</strong>：任何节点都可在总线空闲时主动发起通信，无中心节点。</li>
+            <li><strong>广播（Broadcast）</strong>：所有节点都能收到每一帧，由报文标识符决定是否处理。</li>
+            <li><strong>非破坏性仲裁</strong>：多节点同时发送时，优先级高的报文完整发出，低优先级的自动退避，不会破坏总线上的任何位。</li>
+            <li><strong>差分信号</strong>：使用 CAN_H / CAN_L 双绞线，抗电磁干扰能力强。</li>
+            <li><strong>强大的错误检测</strong>：位错误、填充错误、CRC 错误、格式错误、应答错误，5 种检错机制。</li>
+            <li><strong>故障界定</strong>：节点能区分临时干扰与永久性故障，故障节点可自动脱离总线（Bus-Off），不影响全网。</li>
+          </ul>
+
+          <h2>1.3 物理层：差分信号</h2>
+          <p>CAN 使用一对双绞线传输差分信号：<code>CAN_H</code> 与 <code>CAN_L</code>。总线上只有两种逻辑状态：</p>
+
+          <table>
+            <thead><tr><th>状态</th><th>逻辑值</th><th>CAN_H</th><th>CAN_L</th><th>差分电压</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>显性 Dominant</td><td><strong>0</strong></td><td>≈ 3.5 V</td><td>≈ 1.5 V</td><td>≈ 2.0 V</td><td>由发送器驱动</td></tr>
+              <tr><td>隐性 Recessive</td><td><strong>1</strong></td><td>≈ 2.5 V</td><td>≈ 2.5 V</td><td>≈ 0 V</td><td>总线空闲态，靠终端电阻维持</td></tr>
+            </tbody>
+          </table>
+
+          <div class="frame">
+            <span class="alt3">CAN_H</span><span>3.5V</span><span>2.5V</span><span>3.5V</span><span>2.5V</span><span>2.5V</span>
+          </div>
+          <div class="frame">
+            <span class="alt3">CAN_L</span><span>1.5V</span><span>2.5V</span><span>1.5V</span><span>2.5V</span><span>2.5V</span>
+          </div>
+          <p class="frame-note">↑ 显性(0) / 隐性(1) / 显性(0) / 隐性(1) / 隐性(1) 的电平示意</p>
+
+          <div class="callout info">
+            <div class="callout-title">“线与”逻辑</div>
+            <p>只要有任意一个节点输出<strong>显性</strong>，总线就是显性；只有所有节点都输出<strong>隐性</strong>，总线才是隐性。这种“线与”特性是 CAN 仲裁的物理基础。</p>
+          </div>
+
+          <h2>1.4 终端电阻与拓扑</h2>
+          <p>高速 CAN（ISO 11898-2）必须使用<strong>线性总线拓扑</strong>，并在总线两端各接一个 <code>120 Ω</code> 终端电阻，用于：</p>
+          <ul>
+            <li>阻抗匹配，抑制信号反射（否则高速时会出现振铃，导致误判）。</li>
+            <li>在隐性状态下为总线提供约 2.5 V 的偏置电平。</li>
+          </ul>
+          <pre><code>  [节点1]──[节点2]──[节点3]── ... ──[节点N]
+     │                          │
+   120Ω                       120Ω
+     │                          │
+   ─────────── CAN 总线（双绞线）───────────</code></pre>
+          <div class="callout warn">
+            <div class="callout-title">常见错误</div>
+            <p>不要挂星形、树形拓扑；不要在中间加终端电阻；线缆应使用特性阻抗 120 Ω 的双绞线。错误拓扑会导致通信不稳定甚至完全无法通信。</p>
+          </div>
+
+          <h2>1.5 波特率与总线长度</h2>
+          <p>CAN 波特率越高，允许的总线越短（受信号传播延迟限制）。常用经验值：</p>
+          <table>
+            <thead><tr><th>波特率</th><th>最大总线长度（参考）</th><th>典型应用</th></tr></thead>
+            <tbody>
+              <tr><td>1 Mbps</td><td>≈ 40 m</td><td>汽车动力总成、高实时控制</td></tr>
+              <tr><td>500 kbps</td><td>≈ 100 m</td><td>工业自动化最常用</td></tr>
+              <tr><td>250 kbps</td><td>≈ 250 m</td><td>工程机械、较长总线</td></tr>
+              <tr><td>125 kbps</td><td>≈ 500 m</td><td>大楼自动化、长距离</td></tr>
+              <tr><td>50 kbps</td><td>≈ 1000 m</td><td>超长距离、低速</td></tr>
+            </tbody>
+          </table>
+          <p>同一总线上所有节点必须使用<strong>完全相同</strong>的波特率，且位时序参数（SJW、TSEG1、TSEG2）也需匹配，否则会出现错误帧。</p>
+
+          <h2>1.6 多主与非破坏性仲裁</h2>
+          <p>CAN 采用 <code>CSMA/CD + AMP</code>（载波侦听多路访问 / 冲突检测 + 逐位仲裁）。当多个节点同时检测到总线空闲并开始发送时：</p>
+          <ol>
+            <li>所有节点从<strong>标识符（ID）的最高位</strong>开始逐位发送。</li>
+            <li>每发完一位，节点都<strong>回读</strong>总线实际电平。</li>
+            <li>若某节点发的是<strong>隐性(1)</strong>，却读到总线为<strong>显性(0)</strong>，说明有更高优先级节点在发送 → 该节点<strong>立即停止发送</strong>（退避），转为接收。</li>
+            <li>由于“线与”特性，高优先级报文的每一位都<strong>完整、不受破坏</strong>地出现在总线上。</li>
+          </ol>
+          <p>因此：<strong>标识符数值越小，优先级越高</strong>（因为显性=0，越靠前出现 0 越早压制对手）。</p>
+
+          <div class="callout tip">
+            <div class="callout-title">示例</div>
+            <p>节点 A 发 ID = 0b101（5），节点 B 发 ID = 0b100（4），同时发送：</p>
+            <ul>
+              <li>第 1 位：都发 1（隐性）→ 总线 1，都通过。</li>
+              <li>第 2 位：都发 0（显性）→ 总线 0，都通过。</li>
+              <li>第 3 位：A 发 1，B 发 0 → 总线被 B 拉成 0。A 读到 0 ≠ 自己发的 1 → A 仲裁失败，退避。</li>
+              <li>结果：B（ID=4）完整发出，A 等待下一次总线空闲重发。<strong>整个过程没有任何数据被破坏</strong>。</li>
+            </ul>
+          </div>
+
+          <h2>1.7 四种帧类型</h2>
+          <table>
+            <thead><tr><th>帧类型</th><th>用途</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>数据帧 Data Frame</td><td>携带数据</td><td>最常用，0~8 字节（CAN FD 可达 64 字节）</td></tr>
+              <tr><td>远程帧 Remote Frame</td><td>请求数据</td><td>RTR=1，无数据场，请求某标识符的节点回应数据帧</td></tr>
+              <tr><td>错误帧 Error Frame</td><td>报错</td><td>6 个连续显性位（错误标志）+ 8 个隐性位（错误界定符）</td></tr>
+              <tr><td>过载帧 Overload Frame</td><td>请求延迟</td><td>接收方来不及处理时插入，暂停后续帧发送</td></tr>
+            </tbody>
+          </table>
+
+          <h2>1.8 位填充（Bit Stuffing）</h2>
+          <p>为了保证接收方能从信号中恢复时钟（CAN 无独立时钟线，靠边沿同步），规定：</p>
+          <blockquote>发送方在发送<strong>5 个相同极性</strong>的位之后，必须插入 1 个<strong>相反极性</strong>的位；接收方收到后将其去除。</blockquote>
+          <p>例如发送 <code>000000</code>，实际线上为 <code>00000 1 0</code>（插入的 1 即填充位）。</p>
+          <div class="callout warn">
+            <p>位填充只作用于帧起始到 CRC 序列（含）；CRC 界定符、ACK、EOF 等固定字段<strong>不填充</strong>。错误帧也不填充。</p>
+          </div>
+
+          <h2>1.9 CAN 2.0A / 2.0B 与 CAN FD</h2>
+          <ul>
+            <li><strong>CAN 2.0A</strong>：仅支持 <strong>11 位</strong>标准标识符（Standard ID）。</li>
+            <li><strong>CAN 2.0B</strong>（主动）：同时支持 11 位标准帧和 <strong>29 位</strong>扩展帧（Extended ID），通过 SRR/IDE 位区分。</li>
+            <li><strong>CAN FD</strong>：兼容经典 CAN 帧结构，支持更长数据场（最多 64 字节）和数据段更快波特率，汽车领域逐步普及。</li>
+          </ul>
+
+          <div class="callout tip">
+            <div class="callout-title">本章小结</div>
+            <p>CAN = 差分 + 多主 + 非破坏性仲裁 + 强错误检测。显性=0 覆盖隐性=1 是仲裁的物理本质；120 Ω 终端电阻与线性拓扑是稳定通信的前提；所有节点波特率必须一致。下一章我们深入到<strong>帧的每一个位域</strong>。</p>
+          </div>
+        </article>
+      </section>
+
+      <!-- ============ 第 2 章 ============ -->
+      <section class="chapter" id="ch2" data-chapter="can-framing">
+        <div class="breadcrumb"><a href="#top">首页</a> / 帧格式</div>
+        <h1 class="page-title">第 2 章 · 帧格式、位时序与错误</h1>
+        <p class="page-sub">把一帧 CAN 报文拆到“位”，理解每个字段的含义，以及出错时总线会发生什么。</p>
+
+        <article>
+          <h2>2.1 标准数据帧（11 位 ID）</h2>
+          <p>标准数据帧由 7 个场组成，下图为完整位域（不含填充位）：</p>
+          <div class="frame">
+            <span>SOF</span><span class="alt3">ID[10:0]</span><span>RTR</span><span>IDE</span><span>r0</span><span class="alt">DLC</span><span class="alt2">Data</span><span>CRC</span><span>CRC_d</span><span>ACK</span><span>ACK_d</span><span>EOF</span><span>IFS</span>
+          </div>
+          <p class="frame-note">SOF=帧起始；ID=标识符；DLC=数据长度码；CRC_d=CRC界定符；ACK_d=ACK界定符；EOF=帧结束；IFS=帧间间隔</p>
+
+          <table>
+            <thead><tr><th>场</th><th>位数</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>SOF（帧起始）</td><td>1</td><td>单个显性位(0)，标志帧开始，同时用于硬同步</td></tr>
+              <tr><td>仲裁场</td><td>12+2</td><td>11 位 ID + RTR + IDE + r0</td></tr>
+              <tr><td>控制场</td><td>6</td><td>r0(保留) + 4 位 DLC + r0</td></tr>
+              <tr><td>数据场</td><td>0~64</td><td>0~8 字节，由 DLC 指定长度</td></tr>
+              <tr><td>CRC 场</td><td>16</td><td>15 位 CRC + 1 位 CRC 界定符(隐性)</td></tr>
+              <tr><td>ACK 场</td><td>2</td><td>ACK 槽 + ACK 界定符(隐性)</td></tr>
+              <tr><td>EOF</td><td>7</td><td>7 个连续隐性位，标志帧结束</td></tr>
+              <tr><td>IFS</td><td>3</td><td>3 个隐性位的帧间间隔</td></tr>
+            </tbody>
+          </table>
+
+          <h3>关键字段解释</h3>
+          <ul>
+            <li><strong>ID（标识符）</strong>：既是报文地址，也是仲裁优先级。11 位范围 0x000 ~ 0x7FF。</li>
+            <li><strong>RTR（远程发送请求）</strong>：数据帧 = 0（显性），远程帧 = 1（隐性）。</li>
+            <li><strong>IDE（标识符扩展位）</strong>：标准帧 = 0，扩展帧 = 1。</li>
+            <li><strong>DLC（数据长度码）</strong>：4 位，取值 0~8 表示数据字节数；9~15 也按 8 字节处理。</li>
+            <li><strong>ACK 槽</strong>：发送方发隐性，<strong>任何正确接收的节点都回写显性</strong>，表示“我收到了”。</li>
+          </ul>
+
+          <div class="callout tip">
+            <div class="callout-title">示例：发送 0x123 携带数据 [0x11, 0x22]</div>
+            <p>ID = 0x123 = 0b001 0010 0011，DLC = 2。用工具（如 candump）抓到的典型输出：</p>
+            <pre><code>  can0  123   [2]  11 22</code></pre>
+          </div>
+
+          <h2>2.2 扩展数据帧（29 位 ID）</h2>
+          <p>扩展帧（CAN 2.0B）将标识符扩展到 29 位，仲裁场多了一个 SRR 位和 IDE：</p>
+          <div class="frame">
+            <span>SOF</span><span class="alt3">ID28-18</span><span>SRR</span><span>IDE</span><span class="alt3">ID17-0</span><span>RTR</span><span>r1</span><span>r0</span><span class="alt">DLC</span><span class="alt2">Data</span><span>CRC</span><span>...</span>
+          </div>
+          <ul>
+            <li><strong>SRR（替代远程请求）</strong>：固定为隐性(1)，占据标准帧 RTR 的位置，确保<strong>相同基础 ID 时标准帧优先级高于扩展帧</strong>。</li>
+            <li><strong>IDE = 1</strong>：表示此为扩展帧。</li>
+            <li>29 位 ID 范围 0x00000000 ~ 0x1FFFFFFF。</li>
+          </ul>
+
+          <h2>2.3 远程帧</h2>
+          <p>远程帧用于<strong>请求</strong>其他节点发送指定标识符的数据帧：</p>
+          <ul>
+            <li>RTR = 1（隐性）。</li>
+            <li><strong>没有数据场</strong>（DLC 仍按期望长度设置，但不发送数据）。</li>
+            <li>当某节点收到“自己负责的 ID”的远程帧时，应以对应 ID 发回数据帧。</li>
+          </ul>
+          <div class="callout info">
+            <p>在 CANopen 等现代应用层中，远程帧<strong>很少使用</strong>（SDO/PDO 已覆盖请求/响应场景），但经典 CAN 应用中仍可见到。</p>
+          </div>
+
+          <h2>2.4 位时序与采样点</h2>
+          <p>CAN 没有独立时钟线，接收方靠信号边沿同步。每一位时间（Bit Time）被划分为若干<strong>时间份额（TQ）</strong>：</p>
+          <div class="frame">
+            <span>SS</span><span class="alt2">PTS</span><span class="alt3">PS1</span><span>采样点</span><span class="alt">PS2</span>
+          </div>
+          <table>
+            <thead><tr><th>段</th><th>含义</th><th>典型 TQ 数</th></tr></thead>
+            <tbody>
+              <tr><td>SS 同步段</td><td>边沿对齐，固定 1 TQ</td><td>1</td></tr>
+              <tr><td>PTS 传播段</td><td>补偿信号在总线与收发器的延迟</td><td>1~8</td></tr>
+              <tr><td>PS1 相位段 1</td><td>可被 SJW 延长</td><td>1~8</td></tr>
+              <tr><td>PS2 相位段 2</td><td>可被 SJW 缩短</td><td>1~8</td></tr>
+            </tbody>
+          </table>
+          <ul>
+            <li><strong>采样点（Sample Point）</strong> = (SS + PTS + PS1) / 总TQ，通常设在 <strong>75%~87.5%</strong> 处。</li>
+            <li><strong>SJW（同步跳转宽度）</strong>：每次重同步允许调整的最大 TQ 数，一般设 1~2 TQ。</li>
+            <li>总 TQ 数 = SS + PTS + PS1 + PS2，通常取 8~25。</li>
+          </ul>
+
+          <div class="callout tip">
+            <div class="callout-title">例：500 kbps，8 MHz 时钟，采样点 87.5%</div>
+            <p>若预分频使 1 TQ = 125 ns，则 1 位 = 16 TQ = 2 μs → 500 kbps。配置：SS=1, PTS=2, PS1=11, PS2=2 → 采样点 = (1+2+11)/16 = 87.5%。</p>
+            <p>SJA1000 类寄存器常见写法：<code>BTR0 = 0x00</code>（SJW=1, 波特率预分频），<code>BTR1 = 0x1C</code>（采样点配置）。不同芯片换算不同，务必查手册。</p>
+          </div>
+
+          <h2>2.5 五种错误检测</h2>
+          <table>
+            <thead><tr><th>错误类型</th><th>检测者</th><th>触发条件</th></tr></thead>
+            <tbody>
+              <tr><td>位错误 Bit Error</td><td>发送节点</td><td>发送的位与回读到的总线电平不符（仲裁场/ACK 槽除外）</td></tr>
+              <tr><td>填充错误 Stuff Error</td><td>所有节点</td><td>检测到 6 个连续相同极性的位</td></tr>
+              <tr><td>CRC 错误</td><td>接收节点</td><td>收到的 CRC 与本地计算不一致</td></tr>
+              <tr><td>格式错误 Form Error</td><td>所有节点</td><td>固定格式位（EOF/界定符等）出现非法显性位</td></tr>
+              <tr><td>应答错误 ACK Error</td><td>发送节点</td><td>ACK 槽未读到显性（无人确认）</td></tr>
+            </tbody>
+          </table>
+
+          <h2>2.6 错误状态机（TEC / REC）</h2>
+          <p>每个节点维护两个计数器：<strong>TEC</strong>（发送错误计数）和 <strong>REC</strong>（接收错误计数），根据错误事件加减：</p>
+          <ul>
+            <li><strong>Error Active（错误主动）</strong>：TEC ≤ 127 且 REC ≤ 127。节点发现错误时发送<strong>6 个显性位</strong>的主动错误标志，强力打断当前帧。</li>
+            <li><strong>Error Passive（错误被动）</strong>：TEC 或 REC ≥ 128 且 ≤ 255。节点只能发<strong>6 个隐性位</strong>的被动错误标志，且发送成功后需等待 8 个额外隐性位（暂停发送）。</li>
+            <li><strong>Bus-Off（总线关闭）</strong>：TEC ≥ 256。节点完全脱离总线，不再影响总线。恢复需软件触发或在 128×11 个隐性位后自动恢复（具体看芯片配置）。</li>
+          </ul>
+          <div class="callout danger">
+            <div class="callout-title">频繁进 Bus-Off 排查思路</div>
+            <ol>
+              <li>两端 120 Ω 终端电阻是否装好？用万用表测 CAN_H/CAN_L 间应为 60 Ω 左右。</li>
+              <li>波特率 / 位时序是否全网一致？</li>
+              <li>线缆是否过长或拓扑错误？</li>
+              <li>收发器供电/地是否正常？有无强干扰源（变频器、电机）？</li>
+              <li>用示波器看波形是否有振铃、台阶。</li>
+            </ol>
+          </div>
+
+          <h2>2.7 错误帧结构</h2>
+          <div class="frame">
+            <span class="alt">错误标志</span><span>错误界定符</span>
+          </div>
+          <ul>
+            <li><strong>错误标志</strong>：主动错误 = 6 个显性；被动错误 = 6 个隐性（可能被其他节点的显性覆盖）。</li>
+            <li><strong>错误界定符</strong>：8 个隐性位，之后节点重新尝试发送或恢复。</li>
+          </ul>
+          <p>当多个节点同时报错时，错误标志会叠加成最多 6~12 个显性位，但不会破坏后续数据——出错的帧会被<strong>整帧丢弃并重发</strong>，保证数据完整性。</p>
+
+          <div class="callout tip">
+            <div class="callout-title">本章小结</div>
+            <p>一帧 CAN 报文从 SOF 到 IFS，每个位域各司其职；采样点设在 75%~87.5% 最稳妥；5 种错误检测 + TEC/REC 状态机让 CAN 在干扰下仍能自愈。下一章进入应用层，看看 <strong>CANopen 如何组织这些原始帧</strong>。</p>
+          </div>
+        </article>
+      </section>
+
+      <!-- ============ 第 3 章 ============ -->
+      <section class="chapter" id="ch3" data-chapter="canopen">
+        <div class="breadcrumb"><a href="#top">首页</a> / CANopen</div>
+        <h1 class="page-title">第 3 章 · CANopen 概述</h1>
+        <p class="page-sub">CANopen = CAN 之上的应用层。本章建立整体心智模型：设备由什么组成、节点之间怎么说话、上电后经历哪些状态。</p>
+
+        <article>
+          <h2>3.1 什么是 CANopen</h2>
+          <p>CANopen 是由 <strong>CiA（CAN in Automation）</strong>组织制定的、基于 CAN 总线的<strong>应用层协议</strong>，核心规范是 <code>CiA 301</code>。它在原始 CAN 帧之上定义了：</p>
+          <ul>
+            <li>设备如何<strong>描述自身</strong>（对象字典 Object Dictionary）。</li>
+            <li>设备之间如何<strong>交换数据</strong>（通信对象 Communication Objects）。</li>
+            <li>网络如何被<strong>管理与监控</strong>（NMT、心跳、EMCY）。</li>
+            <li>设备如何被<strong>标准化配置</strong>（EDS/DCF 文件、设备子协议 CiA 4xx）。</li>
+          </ul>
+          <p>一句话：<strong>CANopen 把“裸 CAN 报文”变成了“有语义、可配置、即插即用的设备通信”</strong>。</p>
+
+          <div class="callout info">
+            <div class="callout-title">相关规范</div>
+            <ul>
+              <li><code>CiA 301</code>：应用层与通信规范（核心）。</li>
+              <li><code>CiA 302</code>：网络管理与规划。</li>
+              <li><code>CiA 305</code>：LSS 层设置服务（动态分配 Node-ID / 波特率）。</li>
+              <li><code>CiA 306</code>：电子数据表（EDS / DCF）格式。</li>
+              <li><code>CiA 401</code>：IO 模块设备子协议。</li>
+              <li><code>CiA 402</code>：驱动器与运动控制设备子协议。</li>
+            </ul>
+          </div>
+
+          <h2>3.2 CANopen 设备模型</h2>
+          <p>每个 CANopen 设备由三部分组成：</p>
+          <div class="card-grid">
+            <div class="card"><h4>通信单元</h4><p>实现 CAN 收发与各类通信对象（SDO/PDO/NMT 等）。</p></div>
+            <div class="card"><h4>对象字典 OD</h4><p>设备的“通讯录+配置表”，所有参数与数据都映射为 OD 条目。</p></div>
+            <div class="card"><h4>应用 / 功能单元</h4><p>设备的实际功能（如 ADC、PWM、电机控制），由设备子协议定义。</p></div>
+          </div>
+          <p><strong>对象字典（OD）是 CANopen 的灵魂</strong>。外部对设备的所有读写，本质上都是在读写对象字典中的某一条目。下一章专门讲解。</p>
+
+          <h2>3.3 三种通信模型</h2>
+          <table>
+            <thead><tr><th>模型</th><th>典型对象</th><th>特点</th></tr></thead>
+            <tbody>
+              <tr><td>客户端-服务器 Client/Server</td><td>SDO</td><td>请求-响应式，点对点，可靠，用于配置与少量数据交换</td></tr>
+              <tr><td>生产者-消费者 Producer/Consumer</td><td>PDO、SYNC、EMCY</td><td>一生产多消费，广播，高效，用于周期性过程数据</td></tr>
+              <tr><td>主从 Master/Slave</td><td>NMT</td><td>主站控制从站状态机</td></tr>
+            </tbody>
+          </table>
+
+          <h2>3.4 通信对象（COB）一览</h2>
+          <table>
+            <thead><tr><th>通信对象</th><th>缩写</th><th>用途</th><th>传输类型</th></tr></thead>
+            <tbody>
+              <tr><td>网络管理</td><td>NMT</td><td>控制节点状态（启动/停止/复位）</td><td>主从</td></tr>
+              <tr><td>服务数据对象</td><td>SDO</td><td>读写对象字典（配置/少量数据）</td><td>客户端-服务器</td></tr>
+              <tr><td>过程数据对象</td><td>PDO</td><td>传输实时过程数据（TPDO 生产 / RPDO 消费）</td><td>生产者-消费者</td></tr>
+              <tr><td>同步对象</td><td>SYNC</td><td>提供网络时钟，触发同步 PDO 采样</td><td>广播</td></tr>
+              <tr><td>时间戳对象</td><td>TIME</td><td>分发全网时间</td><td>广播</td></tr>
+              <tr><td>紧急对象</td><td>EMCY</td><td>设备故障时主动上报错误</td><td>生产者-消费者</td></tr>
+              <tr><td>心跳 / 节点守护</td><td>Heartbeat / Node Guarding</td><td>监控节点存活状态</td><td>单向 / 主从</td></tr>
+            </tbody>
+          </table>
+
+          <h2>3.5 预定义连接集（Predefined Connection Set）</h2>
+          <p>为了让设备“上电即用”，CiA 301 为每个节点（Node-ID = 1~127）<strong>预分配了一组默认 CAN 标识符（COB-ID）</strong>。规则：<code>COB-ID = 功能码 + Node-ID</code>。</p>
+
+          <table>
+            <thead><tr><th>通信对象</th><th>方向</th><th>COB-ID</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>NMT 控制</td><td>主→从</td><td><code>0x000</code></td><td>全网广播，数据含命令+目标 Node-ID</td></tr>
+              <tr><td>SYNC</td><td>主→全网</td><td><code>0x080</code></td><td>同步信号（可带计数器）</td></tr>
+              <tr><td>TIME</td><td>主→全网</td><td><code>0x100</code></td><td>6 字节时间戳</td></tr>
+              <tr><td>EMCY</td><td>从→全网</td><td><code>0x080 + Node-ID</code></td><td>紧急报文（注：与 SYNC 同基，靠数据区分）</td></tr>
+              <tr><td>TPDO1</td><td>节点→全网</td><td><code>0x180 + Node-ID</code></td><td>第 1 发送 PDO</td></tr>
+              <tr><td>RPDO1</td><td>全网→节点</td><td><code>0x200 + Node-ID</code></td><td>第 1 接收 PDO</td></tr>
+              <tr><td>TPDO2</td><td>节点→全网</td><td><code>0x280 + Node-ID</code></td><td></td></tr>
+              <tr><td>RPDO2</td><td>全网→节点</td><td><code>0x300 + Node-ID</code></td><td></td></tr>
+              <tr><td>TPDO3</td><td>节点→全网</td><td><code>0x380 + Node-ID</code></td><td></td></tr>
+              <tr><td>RPDO3</td><td>全网→节点</td><td><code>0x400 + Node-ID</code></td><td></td></tr>
+              <tr><td>TPDO4</td><td>节点→全网</td><td><code>0x480 + Node-ID</code></td><td></td></tr>
+              <tr><td>RPDO4</td><td>全网→节点</td><td><code>0x500 + Node-ID</code></td><td></td></tr>
+              <tr><td>SDO 服务器接收</td><td>客户端→节点</td><td><code>0x600 + Node-ID</code></td><td>节点作为 SDO 服务器收请求</td></tr>
+              <tr><td>SDO 服务器发送</td><td>节点→客户端</td><td><code>0x580 + Node-ID</code></td><td>节点作为 SDO 服务器发响应</td></tr>
+              <tr><td>心跳 / 节点守护</td><td>节点→全网</td><td><code>0x700 + Node-ID</code></td><td>节点状态（心跳）；LSS 也用 0x7E4/0x7E5</td></tr>
+            </tbody>
+          </table>
+
+          <div class="callout tip">
+            <div class="callout-title">例子：Node-ID = 5 的节点</div>
+            <ul>
+              <li>别人给它发 SDO 请求 → ID <code>0x605</code>；它回复 SDO → ID <code>0x585</code>。</li>
+              <li>它发 TPDO1 → ID <code>0x185</code>；收 RPDO1 → 监听 ID <code>0x205</code>。</li>
+              <li>它发心跳 → ID <code>0x705</code>，数据 = 状态字节。</li>
+            </ul>
+          </div>
+          <p>这些默认 COB-ID 都可通过对象字典（如 0x1400/0x1800）重新映射，实现灵活组网。</p>
+
+          <h2>3.6 节点状态机（NMT State Machine）</h2>
+          <p>每个 CANopen 节点有 4 个状态：</p>
+          <div class="frame">
+            <span>Initialization</span><span>→</span><span class="alt2">Pre-operational</span><span>↔</span><span class="alt3">Operational</span><span>↔</span><span class="alt">Stopped</span>
+          </div>
+          <ul>
+            <li><strong>Initialization（初始化）</strong>：上电后短暂状态，加载参数、初始化 OD，完成后<strong>自动</strong>进入 Pre-operational 并发 Boot-up 报文（0x700+ID，数据=0x00）。</li>
+            <li><strong>Pre-operational（预操作）</strong>：可进行 SDO 配置、心跳、EMCY、SYNC 接收，但 <strong>PDO 不传输</strong>。用于启动时配置参数。</li>
+            <li><strong>Operational（操作）</strong>：正常工作，PDO 开始传输。</li>
+            <li><strong>Stopped（停止）</strong>：仅维持 NMT 与心跳，不发 PDO 也不响应 SDO。</li>
+          </ul>
+
+          <h3>NMT 控制命令</h3>
+          <p>主站发 <code>0x000</code>，数据场 2 字节：<code>[命令码, 目标Node-ID]</code>（Node-ID=0 表示广播给所有节点）。</p>
+          <table>
+            <thead><tr><th>命令码</th><th>含义</th></tr></thead>
+            <tbody>
+              <tr><td>0x01</td><td>进入 Operational（启动）</td></tr>
+              <tr><td>0x02</td><td>进入 Stopped</td></tr>
+              <tr><td>0x80</td><td>进入 Pre-operational</td></tr>
+              <tr><td>0x81</td><td>复位节点（Reset Node）→ Initialization</td></tr>
+              <tr><td>0x82</td><td>复位通信（Reset Communication）→ Initialization</td></tr>
+            </tbody>
+          </table>
+
+          <h2>3.7 典型启动流程</h2>
+          <pre><code>1. 节点上电 → Initialization → 初始化对象字典
+2. 自动进入 Pre-operational
+   → 发送 Boot-up:  ID=0x700+NodeID  Data=[0x00]
+3. 主站收到 Boot-up，开始用 SDO (0x600+ID) 配置节点参数
+   (映射 PDO、设置心跳时间等)
+4. 主站发送 NMT Start:  ID=0x000  Data=[0x01, NodeID]
+5. 节点进入 Operational，开始周期性 PDO 通信
+6. 主站持续监听心跳 (0x700+ID) 与 EMCY (0x080+ID) 监控状态</code></pre>
+
+          <div class="callout tip">
+            <div class="callout-title">本章小结</div>
+            <p>CANopen 用对象字典统一设备描述，用预定义 COB-ID 实现上电即用，用 NMT 状态机管理生命周期。记住 <strong>0x600+ID / 0x580+ID 是 SDO，0x180+ID / 0x200+ID 是 PDO1，0x700+ID 是心跳</strong>——这是抓包分析的起点。下一章深入对象字典。</p>
+          </div>
+        </article>
+      </section>
+
+      <!-- ============ 第 4 章 ============ -->
+      <section class="chapter" id="ch4" data-chapter="object-dictionary">
+        <div class="breadcrumb"><a href="#top">首页</a> / 对象字典</div>
+        <h1 class="page-title">第 4 章 · 对象字典（OD）</h1>
+        <p class="page-sub">对象字典是 CANopen 的灵魂。所有参数、数据、配置都在这里——读懂它，就读懂了一台设备。</p>
+
+        <article>
+          <h2>4.1 什么是对象字典</h2>
+          <p><strong>对象字典（Object Dictionary, OD）</strong>是一个有序的参数集合，描述了设备的全部数据与功能。它是外部与设备交互的<strong>唯一入口</strong>：</p>
+          <blockquote>SDO 读写的是 OD 条目；PDO 传输的是 OD 条目的值；NMT 操作的也是 OD 中定义的状态。</blockquote>
+          <p>每个对象用一个 <strong>16 位索引（Index）</strong>定位，复杂对象再用一个 <strong>8 位 子索引（Sub-index）</strong>细分。访问格式常写作：<code>0x索引:子索引</code>，例如 <code>0x1018:01</code>。</p>
+
+          <h2>4.2 对象的结构</h2>
+          <p>每个对象字典条目包含以下属性：</p>
+          <table>
+            <thead><tr><th>属性</th><th>含义</th></tr></thead>
+            <tbody>
+              <tr><td>Index</td><td>16 位索引，对象的地址</td></tr>
+              <tr><td>Sub-index</td><td>8 位子索引，0 号常表示元素数量/最大子索引</td></tr>
+              <tr><td>Name</td><td>对象名称</td></tr>
+              <tr><td>Type</td><td>数据类型（如 UNSIGNED32、VISIBLE_STRING）</td></tr>
+              <tr><td>Attr</td><td>访问属性：ro / wo / rw / const，是否可映射到 PDO</td></tr>
+              <tr><td>Default</td><td>默认值</td></tr>
+              <tr><td>PDO Mapping</td><td>是否允许映射到 PDO（mpo = mappable）</td></tr>
+            </tbody>
+          </table>
+
+          <h2>4.3 索引分区</h2>
+          <p>16 位索引空间按用途划分为若干区域：</p>
+          <table>
+            <thead><tr><th>索引范围</th><th>区域</th><th>用途</th></tr></thead>
+            <tbody>
+              <tr><td>0x0000</td><td>保留</td><td>不使用</td></tr>
+              <tr><td>0x0001 – 0x0FFF</td><td>数据类型区</td><td>静态数据类型定义（基本类型、数组、记录）</td></tr>
+              <tr><td><strong>0x1000 – 0x1FFF</strong></td><td><strong>通信行规区</strong></td><td>CANopen 通信参数（所有设备都有）</td></tr>
+              <tr><td>0x2000 – 0x5FFF</td><td>制造商特定区</td><td>厂商自定义参数（无统一规范）</td></tr>
+              <tr><td><strong>0x6000 – 0x9FFF</strong></td><td><strong>标准设备行规区</strong></td><td>由设备子协议定义（如 CiA 402 驱动对象）</td></tr>
+              <tr><td>0xA000 – 0xFFFF</td><td>保留 / 未来</td><td>—</td></tr>
+            </tbody>
+          </table>
+
+          <h2>4.4 通信行规区（0x1000）常用对象</h2>
+          <p>这些是几乎所有 CANopen 设备都实现的核心通信对象：</p>
+          <table>
+            <thead><tr><th>索引</th><th>名称</th><th>类型</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>0x1000</td><td>Device Type</td><td>UNSIGNED32</td><td>设备类型与设备子协议（低 16 位=设备子协议号，如 402 → 0x00000192）</td></tr>
+              <tr><td>0x1001</td><td>Error Register</td><td>UNSIGNED8</td><td>错误寄存器，每一位代表一类错误</td></tr>
+              <tr><td>0x1002</td><td>Manufacturer Status Register</td><td>UNSIGNED32</td><td>制造商状态寄存器</td></tr>
+              <tr><td>0x1003</td><td>Pre-defined Error Field</td><td>ARRAY</td><td>历史错误队列，子索引 0=条目数，1..=错误记录</td></tr>
+              <tr><td>0x1005</td><td>COB-ID SYNC</td><td>UNSIGNED32</td><td>SYNC 报文的 CAN ID 及模式</td></tr>
+              <tr><td>0x1006</td><td>Communication Cycle Period</td><td>UNSIGNED32</td><td>SYNC 周期（μs）</td></tr>
+              <tr><td>0x1008</td><td>Device Name</td><td>VISIBLE_STRING</td><td>设备名称</td></tr>
+              <tr><td>0x1009</td><td>Hardware Version</td><td>VISIBLE_STRING</td><td>硬件版本</td></tr>
+              <tr><td>0x100A</td><td>Software Version</td><td>VISIBLE_STRING</td><td>软件版本</td></tr>
+              <tr><td>0x100C</td><td>Guard Time</td><td>UNSIGNED16</td><td>节点守护周期（ms）</td></tr>
+              <tr><td>0x100D</td><td>Life Time Factor</td><td>UNSIGNED8</td><td>存活因子（守护超时 = Guard Time × Life Time）</td></tr>
+              <tr><td>0x1010</td><td>Store Parameters</td><td>RECORD</td><td>保存参数到非易失存储（写 "save" 0x65766173）</td></tr>
+              <tr><td>0x1011</td><td>Restore Default Parameters</td><td>RECORD</td><td>恢复出厂默认（写 "load" 0x64616F6C）</td></tr>
+              <tr><td>0x1014</td><td>COB-ID EMCY</td><td>UNSIGNED32</td><td>EMCY 报文 CAN ID</td></tr>
+              <tr><td>0x1016</td><td>Consumer Heartbeat Time</td><td>ARRAY</td><td>消费的心跳：子索引 n = 高 16 位 Node-ID，低 16 位超时(ms)</td></tr>
+              <tr><td>0x1017</td><td>Producer Heartbeat Time</td><td>UNSIGNED16</td><td>本节点心跳周期（ms），0=不发心跳</td></tr>
+              <tr><td>0x1018</td><td>Identity</td><td>RECORD</td><td>厂商 ID / 产品号 / 版本号 / 序列号</td></tr>
+              <tr><td>0x1200</td><td>SDO Server Parameter</td><td>RECORD</td><td>本节点 SDO 服务器的 COB-ID</td></tr>
+              <tr><td>0x1280</td><td>SDO Client Parameter</td><td>RECORD</td><td>本节点作为 SDO 客户端时对端的 COB-ID</td></tr>
+              <tr><td>0x1400 + n</td><td>RPDO Communication Parameter</td><td>RECORD</td><td>第 n 个 RPDO 的 COB-ID、传输类型等</td></tr>
+              <tr><td>0x1600 + n</td><td>RPDO Mapping Parameter</td><td>RECORD</td><td>第 n 个 RPDO 映射的 OD 条目列表</td></tr>
+              <tr><td>0x1800 + n</td><td>TPDO Communication Parameter</td><td>RECORD</td><td>第 n 个 TPDO 的 COB-ID、传输类型、禁止时间等</td></tr>
+              <tr><td>0x1A00 + n</td><td>TPDO Mapping Parameter</td><td>RECORD</td><td>第 n 个 TPDO 映射的 OD 条目列表</td></tr>
+            </tbody>
+          </table>
+
+          <h2>4.5 数据类型</h2>
+          <table>
+            <thead><tr><th>类型索引</th><th>名称</th><th>长度</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>0x0001</td><td>BOOLEAN</td><td>1 bit</td><td>布尔</td></tr>
+              <tr><td>0x0002</td><td>INTEGER8</td><td>8 位</td><td>有符号 8 位</td></tr>
+              <tr><td>0x0003</td><td>INTEGER16</td><td>16 位</td><td>有符号 16 位</td></tr>
+              <tr><td>0x0004</td><td>INTEGER32</td><td>32 位</td><td>有符号 32 位</td></tr>
+              <tr><td>0x0005</td><td>UNSIGNED8</td><td>8 位</td><td>无符号 8 位</td></tr>
+              <tr><td>0x0006</td><td>UNSIGNED16</td><td>16 位</td><td>无符号 16 位</td></tr>
+              <tr><td>0x0007</td><td>UNSIGNED32</td><td>32 位</td><td>无符号 32 位</td></tr>
+              <tr><td>0x0008</td><td>REAL32</td><td>32 位</td><td>IEEE 754 单精度浮点</td></tr>
+              <tr><td>0x0009</td><td>VISIBLE_STRING</td><td>变长</td><td>可见字符串（ASCII）</td></tr>
+              <tr><td>0x000A</td><td>OCTET_STRING</td><td>变长</td><td>任意字节串</td></tr>
+              <tr><td>0x000B</td><td>UNICODE_STRING</td><td>变长</td><td>Unicode 字符串</td></tr>
+              <tr><td>0x000F</td><td>DOMAIN</td><td>变长</td><td>大数据块（如固件，走分段 SDO）</td></tr>
+              <tr><td>0x0010</td><td>INTEGER24 / REAL64</td><td>—</td><td>扩展类型</td></tr>
+            </tbody>
+          </table>
+          <div class="callout warn">
+            <div class="callout-title">字节序</div>
+            <p>CANopen 多字节数据默认使用<strong>小端（Little-Endian）</strong>：低字节在前。例如 UNSIGNED16 值 0x1234，在 CAN 数据场中先发 0x34，再发 0x12。</p>
+          </div>
+
+          <h2>4.6 数组（ARRAY）与记录（RECORD）</h2>
+          <p>当一个对象包含多个子条目时，使用数组或记录：</p>
+          <ul>
+            <li><strong>ARRAY（数组）</strong>：所有子索引的<strong>数据类型相同</strong>。子索引 0 保存“元素个数”，子索引 1..N 为各元素。</li>
+            <li><strong>RECORD（记录）</strong>：各子索引的<strong>数据类型可以不同</strong>。子索引 0 保存“最大子索引编号”（highest sub-index），子索引 1..N 为各字段。</li>
+          </ul>
+
+          <div class="callout tip">
+            <div class="callout-title">示例：0x1018 Identity（RECORD 类型）</div>
+            <pre><code>0x1018:00 = 4            (最大子索引=4)
+0x1018:01 = 0x00000202   (Vendor ID，如 CiA 分配的厂商号)
+0x1018:02 = 0x00001234   (Product Code 产品代码)
+0x1018:03 = 0x00010002   (Revision Number 版本号)
+0x1018:04 = 0x0000ABCD   (Serial Number 序列号)</code></pre>
+          </div>
+
+          <h2>4.7 访问属性（Attr）</h2>
+          <table>
+            <thead><tr><th>属性</th><th>含义</th></tr></thead>
+            <tbody>
+              <tr><td>ro</td><td>只读（read-only），设备运行时不能改</td></tr>
+              <tr><td>wo</td><td>只写（write-only），如 Store 参数触发</td></tr>
+              <tr><td>rw</td><td>可读可写</td></tr>
+              <tr><td>const</td><td>常量，固定值不可变</td></tr>
+              <tr><td>mpo</td><td>可映射到 PDO（mappable），表示该对象值可被 PDO 传输</td></tr>
+            </tbody>
+          </table>
+
+          <h2>4.8 用 SDO 读写对象字典</h2>
+          <p>对象字典通过 SDO 访问。例如读取 Node-ID=1 的设备类型：</p>
+          <pre><code># 发送 SDO 读请求:  ID=0x601, Data=[0x40, 0x00,0x10, 0x00, 0,0,0,0]
+#   0x40 = 读请求;  0x1000 = 索引(小端: 0x00,0x10);  0x00 = 子索引
+# 收到 SDO 响应:    ID=0x581, Data=[0x43, 0x00,0x10, 0x00, 0x92,0x01,0x00,0x00]
+#   返回 0x00000192 = 402 (CiA 402 驱动器)</code></pre>
+          <p>SDO 协议的具体字节格式在 <a href="#ch5">第 5 章</a> 详解。</p>
+
+          <div class="callout tip">
+            <div class="callout-title">本章小结</div>
+            <p>对象字典 = 设备的全部数据接口。记住索引分区：<strong>0x1000 通信、0x2000 厂商、0x6000 设备行规</strong>；0x1018 是设备身份证，0x1017 是心跳周期。多字节数据小端序。下一章看这些对象如何通过 SDO/PDO 流动起来。</p>
+          </div>
+        </article>
+      </section>
+
+      <!-- ============ 第 5 章 ============ -->
+      <section class="chapter" id="ch5" data-chapter="communication">
+        <div class="breadcrumb"><a href="#top">首页</a> / 通信对象</div>
+        <h1 class="page-title">第 5 章 · 通信对象（SDO / PDO / NMT）</h1>
+        <p class="page-sub">CANopen 的数据如何流动？本章逐个拆解 SDO、PDO、NMT、SYNC、EMCY、心跳的报文格式与使用场景。</p>
+
+        <article>
+          <h2>5.1 SDO —— 服务数据对象</h2>
+          <p>SDO（Service Data Object）用于<strong>读写对象字典</strong>，采用客户端-服务器模型，请求-响应式，<strong>可靠但开销大</strong>，适合配置参数与偶发数据交换。</p>
+          <p>一对 SDO 通道用 2 个 CAN ID：</p>
+          <ul>
+            <li><strong>SDO 服务器接收（客户端 → 服务器）</strong>：<code>0x600 + Node-ID</code></li>
+            <li><strong>SDO 服务器发送（服务器 → 客户端）</strong>：<code>0x580 + Node-ID</code></li>
+          </ul>
+          <p>每帧数据场固定 8 字节：<code>[命令码, 索引低, 索引高, 子索引, 数据0..3]</code>。</p>
+
+          <h3>5.1.1 SDO 命令码（首字节）</h3>
+          <table>
+            <thead><tr><th>命令码</th><th>方向</th><th>含义</th></tr></thead>
+            <tbody>
+              <tr><td><code>0x40</code></td><td>客户端→服务器</td><td>SDO 读请求（Initiate Upload Request）</td></tr>
+              <tr><td><code>0x20</code></td><td>客户端→服务器</td><td>SDO 写请求（普通，非加速）</td></tr>
+              <tr><td><code>0x2F</code></td><td>客户端→服务器</td><td>SDO 写请求（加速，1 字节数据）</td></tr>
+              <tr><td><code>0x2B</code></td><td>客户端→服务器</td><td>SDO 写请求（加速，2 字节数据）</td></tr>
+              <tr><td><code>0x23</code></td><td>客户端→服务器</td><td>SDO 写请求（加速，4 字节数据）</td></tr>
+              <tr><td><code>0x43</code></td><td>服务器→客户端</td><td>SDO 读响应（加速，4 字节）</td></tr>
+              <tr><td><code>0x4B</code></td><td>服务器→客户端</td><td>SDO 读响应（加速，2 字节）</td></tr>
+              <tr><td><code>0x4F</code></td><td>服务器→客户端</td><td>SDO 读响应（加速，1 字节）</td></tr>
+              <tr><td><code>0x42</code></td><td>服务器→客户端</td><td>SDO 读响应（普通，需分段上传）</td></tr>
+              <tr><td><code>0x60</code></td><td>服务器→客户端</td><td>SDO 写响应（下载确认）</td></tr>
+              <tr><td><code>0x80</code></td><td>服务器→客户端</td><td>SDO 错误响应（后跟 4 字节错误码）</td></tr>
+            </tbody>
+          </table>
+
+          <div class="callout tip">
+            <div class="callout-title">例 1：读取 Node-ID=1 的心跳周期（0x1017:00，UINT16）</div>
+            <pre><code>请求  ID=0x601  [40 17 10 00 00 00 00 00]   ← 0x40 读, 索引0x1017, 子索引0x00
+响应  ID=0x581  [4B 17 10 00 E8 03 00 00]   ← 0x4B 2字节, 值=0x03E8=1000ms</code></pre>
+          </div>
+          <div class="callout tip">
+            <div class="callout-title">例 2：写 Node-ID=1 的心跳周期为 500ms（0x01F4）</div>
+            <pre><code>请求  ID=0x601  [2B 17 10 00 F4 01 00 00]   ← 0x2B 写2字节, 0x01F4 小端
+响应  ID=0x581  [60 17 10 00 00 00 00 00]   ← 0x60 写成功</code></pre>
+          </div>
+
+          <h3>5.1.2 加速传输 vs 分段传输</h3>
+          <ul>
+            <li><strong>加速传输（Expedited）</strong>：数据 ≤ 4 字节时，单帧完成读写，命令码带 0x23/0x2B/0x2F（写）或 0x43/0x4B/0x4F（读）。</li>
+            <li><strong>分段传输（Segmented）</strong>：数据 &gt; 4 字节（如字符串、DOMAIN 固件），先发 0x20/0x42 声明长度，再用 0x00/0x01 段命令逐帧传输，每帧最多 7 字节数据，带翻转位与最后段标志。</li>
+            <li><strong>块传输（Block）</strong>：CiA 301 补充，适合大数据（固件升级），一次连续发多个段再统一确认，效率更高。</li>
+          </ul>
+
+          <h2>5.2 PDO —— 过程数据对象</h2>
+          <p>PDO（Process Data Object）用于传输<strong>实时过程数据</strong>，采用生产者-消费者模型，广播，<strong>无确认、开销小、带宽高</strong>。分两类：</p>
+          <ul>
+            <li><strong>TPDO</strong>：本节点生产（发送）的数据。</li>
+            <li><strong>RPDO</strong>：本节点消费（接收）的数据。</li>
+          </ul>
+          <p>每个节点默认最多支持 4 个 TPDO + 4 个 RPDO（可扩展到 512 个）。</p>
+
+          <h3>5.2.1 PDO 映射（Mapping）</h3>
+          <p>PDO 不直接对应某个 OD 对象，而是通过<strong>映射参数</strong>把若干 OD 条目打包进一帧 8 字节：</p>
+          <ul>
+            <li>TPDO 映射：<code>0x1A00 + n</code>（n=0..3 对应 TPDO1~4）</li>
+            <li>RPDO 映射：<code>0x1600 + n</code></li>
+          </ul>
+          <p>每个映射条目是一个 32 位值：<code>索引(16位) | 子索引(8位) | 位长度(8位)</code>。子索引 0 表示映射条目数量。</p>
+          <div class="callout tip">
+            <div class="callout-title">例：TPDO1 映射“状态字 + 实际位置”</div>
+            <pre><code>0x1A00:00 = 2            (2 个映射对象)
+0x1A00:01 = 0x40410010   (0x6041:00 状态字, 16位)   ← 索引0x6041,子索引0,长度0x10
+0x1A00:02 = 0x40640020   (0x6064:00 实际位置, 32位) ← 长度0x20
+# 一帧 TPDO1 共 48 位 = 6 字节，CAN 数据场为 [状态字低, 状态字高, 位置0,1,2,3]</code></pre>
+            <p>注意：映射修改前必须先<strong>禁用</strong>该 PDO（把 0x1800 子索引 1 的 COB-ID 最高位置 1），改完再启用。</p>
+          </div>
+
+          <h3>5.2.2 PDO 通信参数</h3>
+          <p>每个 PDO 的通信参数在 <code>0x1800+n</code>（TPDO）/ <code>0x1400+n</code>（RPDO）：</p>
+          <table>
+            <thead><tr><th>子索引</th><th>名称</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>0x01</td><td>COB-ID</td><td>该 PDO 的 CAN ID，最高位=1 表示禁用</td></tr>
+              <tr><td>0x02</td><td>传输类型</td><td>见下表</td></tr>
+              <tr><td>0x03</td><td>禁止时间 Inhibit Time</td><td>TPDO 最小发送间隔（100μs 单位），防止刷屏</td></tr>
+              <tr><td>0x05</td><td>事件定时器 Event Timer</td><td>异步 TPDO 的周期（ms），到点强制发送</td></tr>
+              <tr><td>0x06</td><td>SYNC 起始值</td><td>同步 PDO 从第几个 SYNC 计数器开始</td></tr>
+            </tbody>
+          </table>
+
+          <h3>5.2.3 传输类型</h3>
+          <table>
+            <thead><tr><th>值</th><th>类型</th><th>触发方式</th></tr></thead>
+            <tbody>
+              <tr><td>0x00</td><td>同步 acyclic</td><td>收到 SYNC 后，仅当数据变化时发送</td></tr>
+              <tr><td>0x01 – 0xF0</td><td>同步 cyclic</td><td>每 N 个 SYNC 周期发送一次</td></tr>
+              <tr><td>0xFC</td><td>同步 RTR</td><td>由远程帧 + SYNC 触发</td></tr>
+              <tr><td>0xFD</td><td>异步 RTR</td><td>由远程帧触发</td></tr>
+              <tr><td>0xFE</td><td>异步（事件+定时器）</td><td>数据变化立即发，且由事件定时器保底</td></tr>
+              <tr><td>0xFF</td><td>异步（仅事件）</td><td>数据变化立即发，无定时器保底</td></tr>
+            </tbody>
+          </table>
+
+          <div class="callout info">
+            <div class="callout-title">选型建议</div>
+            <p>配置参数 → 用 <strong>SDO</strong>；周期性实时数据（位置、速度、IO 状态）→ 用 <strong>PDO</strong>。PDO 映射尽量固定在 8 字节内，避免频繁重映射。</p>
+          </div>
+
+          <h2>5.3 NMT —— 网络管理</h2>
+          <p>NMT 采用主从模型，主站用 ID <code>0x000</code> 广播命令，数据场 2 字节：<code>[命令码, 目标Node-ID]</code>，Node-ID=0 表示全网广播。</p>
+          <table>
+            <thead><tr><th>命令码</th><th>名称</th><th>目标状态</th></tr></thead>
+            <tbody>
+              <tr><td>0x01</td><td>Start Remote Node</td><td>Operational</td></tr>
+              <tr><td>0x02</td><td>Stop Remote Node</td><td>Stopped</td></tr>
+              <tr><td>0x80</td><td>Enter Pre-operational</td><td>Pre-operational</td></tr>
+              <tr><td>0x81</td><td>Reset Node</td><td>Initialization（复位应用）</td></tr>
+              <tr><td>0x82</td><td>Reset Communication</td><td>Initialization（复位通信参数）</td></tr>
+            </tbody>
+          </table>
+          <pre><code># 启动 1 号节点:  ID=0x000  [01 01]
+# 停止全网:       ID=0x000  [02 00]
+# 复位 3 号通信:   ID=0x000  [82 03]</code></pre>
+
+          <h2>5.4 SYNC —— 同步对象</h2>
+          <p>SYNC 由主站周期性发送（默认 ID <code>0x080</code>），为全网提供统一时钟，触发同步型 PDO 的采样与发送。</p>
+          <ul>
+            <li>相关对象：<code>0x1005</code>（COB-ID SYNC）、<code>0x1006</code>（周期 μs）、<code>0x1019</code>（SYNC 计数器溢出值）。</li>
+            <li>SYNC 帧通常无数据（0 字节）；若启用计数器，数据场为 1 字节计数（1..240 循环）。</li>
+            <li>同步型 PDO 节点在收到 SYNC 后立即采样输入、输出，保证多轴<strong>运动同步</strong>。</li>
+          </ul>
+
+          <h2>5.5 EMCY —— 紧急对象</h2>
+          <p>设备发生故障时主动发送 EMCY（默认 ID <code>0x080 + Node-ID</code>），8 字节结构：</p>
+          <div class="frame">
+            <span class="alt">错误码</span><span class="alt">错误码</span><span>错误寄存器</span><span class="alt2">厂商特定</span><span class="alt2">厂商特定</span><span class="alt2">厂商特定</span><span class="alt2">厂商特定</span><span class="alt2">厂商特定</span>
+          </div>
+          <ul>
+            <li>字节 0-1：Emergency Error Code（UINT16，小端），见下表。</li>
+            <li>字节 2：Error Register（对象 0x1001 的值），每 bit 一类错误。</li>
+            <li>字节 3-7：厂商特定诊断信息。</li>
+          </ul>
+          <table>
+            <thead><tr><th>错误码</th><th>类别</th></tr></thead>
+            <tbody>
+              <tr><td>0x0000</td><td>无错误 / 错误复位（恢复时发）</td></tr>
+              <tr><td>0x10xx</td><td>通用错误</td></tr>
+              <tr><td>0x20xx</td><td>电压</td></tr>
+              <tr><td>0x30xx</td><td>温度</td></tr>
+              <tr><td>0x40xx</td><td>通信错误</td></tr>
+              <tr><td>0x50xx</td><td>设备配置错误</td></tr>
+              <tr><td>0x60xx</td><td>软件错误</td></tr>
+              <tr><td>0x80xx</td><td>监控错误（跟随误差、超时等）</td></tr>
+              <tr><td>0x90xx</td><td>外部错误</td></tr>
+              <tr><td>0xF0xx / 0xFFxx</td><td>特定功能 / 设备子协议</td></tr>
+            </tbody>
+          </table>
+          <p>设备错误消失后，应发送 <code>0x0000</code> 的 EMCY（或错误寄存器清零）表示恢复。</p>
+
+          <h2>5.6 心跳（Heartbeat）与节点守护（Node Guarding）</h2>
+          <p>两者都用于监控节点存活，二选一（优先用心跳）。</p>
+
+          <h3>心跳 Heartbeat</h3>
+          <ul>
+            <li>被监控节点（生产者）周期发送 ID <code>0x700 + Node-ID</code>，1 字节数据 = 当前状态：</li>
+          </ul>
+          <table>
+            <thead><tr><th>状态值</th><th>状态</th></tr></thead>
+            <tbody>
+              <tr><td>0x00</td><td>Boot-up（启动报文，仅发一次）</td></tr>
+              <tr><td>0x04</td><td>Stopped</td></tr>
+              <tr><td>0x05</td><td>Operational</td></tr>
+              <tr><td>0x7F</td><td>Pre-operational</td></tr>
+            </tbody>
+          </table>
+          <ul>
+            <li>生产者周期由 <code>0x1017</code>（Producer Heartbeat Time，ms）设置。</li>
+            <li>消费者（监控方）在 <code>0x1016</code>（Consumer Heartbeat Time）配置：每个被监控节点的 Node-ID 和超时时间，超时未收到即判定节点掉线。</li>
+          </ul>
+
+          <h3>节点守护 Node Guarding</h3>
+          <ul>
+            <li>主站向 <code>0x700 + Node-ID</code> 发<strong>远程帧（RTR）</strong>，从站响应同 ID，数据 = 状态 + toggle bit（翻转位）。</li>
+            <li>周期由 <code>0x100C</code>（Guard Time，ms）× <code>0x100D</code>（Life Time Factor）= 超时时间。</li>
+            <li>若连续两次响应 toggle 未翻转，或超时无响应 → 判定故障。</li>
+          </ul>
+
+          <div class="callout tip">
+            <div class="callout-title">抓包实战：一个节点的启动序列</div>
+            <pre><code>ID=0x705  [00]              ← 5号节点 Boot-up (状态0x00)
+ID=0x601  [40 18 10 00 ...]  ← 主站(1)读5号?  (示例：配置阶段大量SDO)
+ID=0x585  [60 ...]           ← 5号 SDO 响应
+ID=0x000  [01 05]            ← 主站 NMT 启动 5 号
+ID=0x185  [11 22 33 44]      ← 5号 TPDO1 开始周期发送
+ID=0x705  [05]              ← 5号心跳 Operational
+ID=0x705  [05]              ← ... 周期心跳</code></pre>
+          </div>
+
+          <div class="callout tip">
+            <div class="callout-title">本章小结</div>
+            <p>SDO 走 <code>0x600/0x580 + ID</code> 读写 OD，≤4 字节用加速传输；PDO 走 <code>0x180/0x200 + ID</code> 传实时数据，靠映射打包；NMT 用 <code>0x000</code> 管状态；SYNC 用 <code>0x080</code> 同步；EMCY 用 <code>0x080+ID</code> 报警；心跳用 <code>0x700+ID</code> 报存活。下一章看设备子协议如何把这些对象组织成具体功能。</p>
+          </div>
+        </article>
+      </section>
+
+      <!-- ============ 第 6 章 ============ -->
+      <section class="chapter" id="ch6" data-chapter="devices">
+        <div class="breadcrumb"><a href="#top">首页</a> / 设备协议</div>
+        <h1 class="page-title">第 6 章 · 设备子协议与 EDS/DCF</h1>
+        <p class="page-sub">通信层之上，设备子协议定义“每个对象代表什么”。重点掌握 CiA 402 伺服驱动，以及用 EDS/DCF 文件配置设备的完整流程。</p>
+
+        <article>
+          <h2>6.1 什么是设备子协议</h2>
+          <p>CiA 301 只定义了通信层。对于具体设备（驱动器、IO 模块、编码器），还需要规范对象字典中 <strong>0x6000–0x9FFF</strong> 区域的对象含义，这些规范就是<strong>设备子协议（CiA 4xx 系列）</strong>。</p>
+          <p>有了设备子协议，不同厂商的同类设备就有了<strong>统一的对象字典</strong>，主站只要按子协议读写对象，就能驱动任何兼容设备——这是 CANopen“即插即用”的关键。</p>
+
+          <h3>常见设备子协议</h3>
+          <table>
+            <thead><tr><th>规范</th><th>设备类型</th><th>典型对象</th></tr></thead>
+            <tbody>
+              <tr><td>CiA 401</td><td>IO 模块（数字量/模拟量）</td><td>0x6000 写输出、0x6200 读输入、0x6401 模拟输入</td></tr>
+              <tr><td>CiA 402</td><td>伺服/步进驱动与运动控制</td><td>0x6040 控制字、0x6041 状态字、0x6060 模式</td></tr>
+              <tr><td>CiA 404</td><td>测量设备（传感器）</td><td>—</td></tr>
+              <tr><td>CiA 406</td><td>编码器</td><td>位置、分辨率、圈数</td></tr>
+              <tr><td>CiA 408</td><td>流体动力（液压/气动）</td><td>压力、流量</td></tr>
+              <tr><td>CiA 418/419</td><td>电池（充电/放电）</td><td>电压、电流、SOC</td></tr>
+            </tbody>
+          </table>
+
+          <h2>6.2 CiA 402 —— 驱动与运动控制（重点）</h2>
+          <p>CiA 402 是工业伺服最常用的协议，定义了驱动器的状态机、控制字/状态字、以及多种控制模式。</p>
+
+          <h3>6.2.1 驱动器状态机</h3>
+          <div class="frame">
+            <span>Not Ready</span><span>→</span><span>Switch on<br>disabled</span><span>→</span><span class="alt2">Ready to<br>switch on</span><span>→</span><span class="alt3">Switched<br>on</span><span>→</span><span class="alt">Operation<br>enabled</span>
+          </div>
+          <p>状态机由<strong>控制字 0x6040</strong> 驱动，由<strong>状态字 0x6041</strong> 反馈。典型上电启动序列：</p>
+          <pre><code>1. 控制字写 0x06  → Shutdown         → 进入 Ready to switch on
+2. 控制字写 0x07  → Switch On        → 进入 Switched on
+3. 控制字写 0x0F  → Enable Operation → 进入 Operation enabled（电机使能）
+# 故障复位：控制字写 0x80（再恢复）→ 清除 Fault 状态</code></pre>
+
+          <h3>6.2.2 控制字 0x6040 关键位</h3>
+          <table>
+            <thead><tr><th>位</th><th>名称</th><th>作用</th></tr></thead>
+            <tbody>
+              <tr><td>bit0</td><td>Switch on</td><td>接通主回路</td></tr>
+              <tr><td>bit1</td><td>Enable voltage</td><td>使能电压</td></tr>
+              <tr><td>bit2</td><td>Quick stop</td><td>快速停止（0 触发快停）</td></tr>
+              <tr><td>bit3</td><td>Enable operation</td><td>使能运行</td></tr>
+              <tr><td>bit4–7</td><td>模式相关</td><td>如位置模式的 new set-point / change immediate</td></tr>
+              <tr><td>bit8</td><td>Fault reset</td><td>上升沿复位故障</td></tr>
+            </tbody>
+          </table>
+
+          <h3>6.2.3 状态字 0x6041 关键位</h3>
+          <table>
+            <thead><tr><th>位</th><th>名称</th><th>含义</th></tr></thead>
+            <tbody>
+              <tr><td>bit0</td><td>Ready to switch on</td><td>就绪可上电</td></tr>
+              <tr><td>bit1</td><td>Switched on</td><td>已上电</td></tr>
+              <tr><td>bit2</td><td>Operation enabled</td><td>运行已使能</td></tr>
+              <tr><td>bit3</td><td>Fault</td><td>故障（1=故障）</td></tr>
+              <tr><td>bit4</td><td>Voltage enabled</td><td>使能电压正常</td></tr>
+              <tr><td>bit5</td><td>Quick stop</td><td>快停状态</td></tr>
+              <tr><td>bit6</td><td>Switch on disabled</td><td>上电禁止</td></tr>
+              <tr><td>bit7</td><td>Warning</td><td>警告</td></tr>
+              <tr><td>bit10</td><td>Target reached</td><td>目标到达</td></tr>
+              <tr><td>bit11</td><td>Internal limit active</td><td>触发内部限位</td></tr>
+            </tbody>
+          </table>
+          <div class="callout info">
+            <p>判断当前状态常看状态字 <strong>bit0–2, bit6 的组合</strong>。例如 Operation enabled 时 bit0=1, bit1=1, bit2=1, bit6=0。</p>
+          </div>
+
+          <h3>6.2.4 控制模式 0x6060</h3>
+          <table>
+            <thead><tr><th>值</th><th>模式</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>PP 轮廓位置</td><td>梯形速度规划，单点定位</td></tr>
+              <tr><td>3</td><td>PV 轮廓速度</td><td>梯形速度规划的速度控制</td></tr>
+              <tr><td>4</td><td>PT 轮廓转矩</td><td>转矩斜坡控制</td></tr>
+              <tr><td>6</td><td>HM 回零</td><td>回参考点（多种回零方式）</td></tr>
+              <tr><td>7</td><td>IP 插补位置</td><td>主站周期下发位置，从站插补</td></tr>
+              <tr><td>8</td><td>CSP 循环同步位置</td><td>SYNC 周期下发目标位置，高动态多轴同步</td></tr>
+              <tr><td>9</td><td>CSV 循环同步速度</td><td>SYNC 周期下发目标速度</td></tr>
+              <tr><td>10</td><td>CST 循环同步转矩</td><td>SYNC 周期下发目标转矩</td></tr>
+            </tbody>
+          </table>
+          <div class="callout tip">
+            <div class="callout-title">多轴同步选 CSP</div>
+            <p>机器人、多轴平台首选 <strong>CSP/CSV/CST</strong>：主站每个 SYNC 周期下发目标值，各轴同步采样，配合 0x60C4 插补周期可实现高动态同步。</p>
+          </div>
+
+          <h3>6.2.5 常用 CiA 402 对象速查</h3>
+          <table>
+            <thead><tr><th>对象</th><th>名称</th><th>单位</th></tr></thead>
+            <tbody>
+              <tr><td>0x6040</td><td>控制字</td><td>—</td></tr>
+              <tr><td>0x6041</td><td>状态字</td><td>—</td></tr>
+              <tr><td>0x6060 / 0x6061</td><td>模式设置 / 模式显示</td><td>—</td></tr>
+              <tr><td>0x607A</td><td>目标位置</td><td>用户单位</td></tr>
+              <tr><td>0x6064</td><td>实际位置</td><td>用户单位</td></tr>
+              <tr><td>0x60FF / 0x606C</td><td>目标速度 / 实际速度</td><td>用户单位/s</td></tr>
+              <tr><td>0x6071 / 0x6077</td><td>目标转矩 / 实际转矩</td><td>千分比额定</td></tr>
+              <tr><td>0x6081</td><td>轮廓速度</td><td>用户单位/s</td></tr>
+              <tr><td>0x6083 / 0x6084</td><td>轮廓加速度 / 减速度</td><td>用户单位/s²</td></tr>
+              <tr><td>0x6091 / 0x6092</td><td>电子齿轮分子 / 分母</td><td>—</td></tr>
+            </tbody>
+          </table>
+
+          <h2>6.3 CiA 401 —— IO 模块</h2>
+          <p>CiA 401 定义数字量/模拟量 IO 的标准对象，常用于分布式 IO：</p>
+          <table>
+            <thead><tr><th>对象</th><th>名称</th></tr></thead>
+            <tbody>
+              <tr><td>0x6000</td><td>8 位数字输出（写）</td></tr>
+              <tr><td>0x6200</td><td>8 位数字输入（读）</td></tr>
+              <tr><td>0x6401</td><td>模拟输入（每通道 16 位）</td></tr>
+              <tr><td>0x6411</td><td>模拟输出</td></tr>
+              <tr><td>0x6020</td><td>IO 中断使能</td></tr>
+            </tbody>
+          </table>
+          <p>IO 数据通常映射到 PDO 周期传输：输入模块用 TPDO 上报，输出模块用 RPDO 下发。</p>
+
+          <h2>6.4 EDS / DCF 配置文件</h2>
+          <h3>EDS（Electronic Data Sheet）</h3>
+          <p>EDS 是设备的<strong>电子数据表</strong>，由设备厂商提供，用 INI 文本格式描述设备的完整对象字典：对象的索引、名称、类型、属性、默认值、取值范围等。主站工具（如 CANopen Magic）导入 EDS 后就能识别设备并进行配置。</p>
+
+          <h3>DCF（Device Configuration File）</h3>
+          <p>DCF 是在 EDS 基础上<strong>填入实际参数值</strong>的配置文件，可通过 SDO 直接下载到设备，实现批量配置。<code>DCF = EDS + [实际配置值]</code>。</p>
+
+          <h3>EDS 文件结构</h3>
+          <pre><code>[FileInfo]
+FileName=MyServo.eds
+FileVersion=1
+FileRevision=0
+...
+[DeviceInfo]
+VendorName=MyMotor
+VendorNumber=0x123
+ProductName=ServoDrive
+ProductNumber=0x456
+...
+[Objects]
+1000=0x1000
+1001=0x1001
+...
+[1000]
+ParameterName=Device Type
+ObjectType=0x7
+DataType=0x0007
+AccessType=ro
+DefaultValue=0x00000192
+[1001]
+ParameterName=Error Register
+...
+[1018]
+ParameterName=Identity
+ObjectType=0x9
+SubNumber=0x5
+[1018sub0]
+ParameterName=Highest sub-index
+...
+[1018sub1]
+ParameterName=Vendor-ID
+DataType=0x0007
+AccessType=ro
+DefaultValue=0x00000123</code></pre>
+          <ul>
+            <li><code>[FileInfo]</code>：文件本身信息（版本、创建工具等）。</li>
+            <li><code>[DeviceInfo]</code>：设备身份（厂商号、产品号、版本、波特率支持、Node-ID 范围等）。</li>
+            <li><code>[Objects]</code>：对象列表。</li>
+            <li><code>[Index]</code> / <code>[IndexsubN]</code>：每个对象及其子索引的详细定义。</li>
+            <li>DCF 比 EDS 多了 <code>[DeviceComissioning]</code> 段和 <code>ParameterValue=</code> 字段，记录要下载的值。</li>
+          </ul>
+
+          <h3>配置下载流程</h3>
+          <pre><code>1. 获取设备 EDS 文件（向厂商索取或官网下载）
+2. 主站工具导入 EDS，识别设备对象字典
+3. 工具中修改参数（PDO 映射、心跳、CiA402 模式等）
+4. 生成 DCF 文件（含修改后的参数值）
+5. 主站通过 SDO 把 DCF 中的参数逐个写入设备
+6. 写 0x1010 保存参数（可选，断电不丢失）
+7. 发送 NMT Start，设备进入 Operational 运行</code></pre>
+
+          <h2>6.5 LSS —— 层设置服务（CiA 305）</h2>
+          <p>LSS（Layer Setting Services）用于<strong>动态分配 Node-ID 和波特率</strong>，无需拨码开关即可组网：</p>
+          <ul>
+            <li>固定 CAN ID：<code>0x7E4</code>（LSS 主→从）、<code>0x7E5</code>（LSS 从→主）。</li>
+            <li>先通过厂商号/产品号/版本/序列号<strong>选择</strong>目标从站（Selective），再配置其 Node-ID 与波特率。</li>
+            <li>适合同型号多设备批量上线，避免手动设地址冲突。</li>
+          </ul>
+
+          <div class="callout tip">
+            <div class="callout-title">本章小结</div>
+            <p>设备子协议让同类设备对象字典标准化：<strong>CiA 402</strong> 用 0x6040/0x6041 控制伺服状态机，用 0x6060 切换模式；<strong>EDS</strong> 描述设备、<strong>DCF</strong> 携带配置，是批量部署的标准工具；<strong>LSS</strong> 可远程分配地址。工具与参数速查见独立的 <a href="tools.html">第 7 章</a>。</p>
+          </div>
+        </article>
+      </section>
+
+      <div id="ad-bottom"></div>
+
+      <nav class="pager">
+        <a href="#top"><div class="label">↑ 回到顶部</div><div class="title">学习路线</div></a>
+        <a class="next" href="tools.html"><div class="label">下一页 →</div><div class="title">第 7 章 · 工具与参数速查</div></a>
+      </nav>
+    </main>
+  </div>
+
+  <footer class="site-footer" id="site-footer"></footer>
+  <button class="to-top" title="回到顶部">↑</button>
+
+  <script src="assets/js/ad.js?v=20261125"></script>
+  <script src="assets/js/layout.js?v=20261125"></script>
+  <script src="assets/js/main.js?v=20261125"></script>
+  <script src="assets/js/exercises.js?v=20261125"></script>
+</body>
+</html>
